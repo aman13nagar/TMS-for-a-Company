@@ -1,0 +1,185 @@
+<%-include("Partials/header")-%>
+<style>
+    body{
+        background-color: #b6bef0;
+    }
+</style>
+<link rel="stylesheet" href="/style.css">
+<nav class="navbar navbar-expand-lg navbar-light bg-dark">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo03" aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <a class="navbar-brand" href="/home-dashboard">TMS</a>
+    <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
+      <form class="form-inline my-2 my-lg-0" action="/home-dashboard" method="POST">
+        <div>
+          <a href="/Profile"><svg xmlns="http://www.w3.org/2000/svg" height="40" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 30 16">
+            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+            <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
+          </svg></a>
+        </div>
+          <!-- <div class="post_btn"><a class="btn btn-dark btn-lg mr-sm-2" href="/Create-post" role="button">Create Post</a></div> -->
+        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Sign Out</button>
+      </form>
+    </div>
+</nav>
+<style>
+    .hist{
+        display:flex;
+        flex-direction: column;
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    th, td {
+        border: 1px solid #040404;
+        padding: 8px;
+        text-align: left;
+    }
+    th {
+        background-color: #f2f2f2;
+    }
+    tbody tr .ce{
+        color:red;
+    }
+    canvas {
+        
+        margin: auto;
+        height:60px;
+        width:60px;
+        max-height:600px;
+        max-width:600px;
+        margin-top:50px;
+        margin-bottom:50px;
+        color:white;
+    }
+    .total {
+        display: flex;
+        flex-direction: column;
+        margin-top:50px;
+    }
+    .total .subtotal{
+        display:flex;
+        flex-direction: column;
+        margin-top:20px;
+        margin-bottom:20px;
+        margin-left:50px;
+        margin-right:50px;
+    }
+    .total .ff{
+        display:flex;
+        place-content: center;
+    }
+</style>
+<div class="total">
+    <div class="subtotal">
+        <table>
+            <thead>
+                <tr>
+                    <th>Executive</th>
+                    <th>Total MeetingTime(in Minutes)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% executiveMeetingTimeStats.forEach(executive=>{%>
+                    <tr>
+                        <% if(currexecutive===executive.executive){%>
+                            <td class="ce"><%= executive.executive %>(current user)</td>
+                            <td class="ce"><%= executive.totalMeetingTime %></td>
+                        <%} else{%>
+                            <td><%= executive.executive %></td>
+                            <td><%= executive.totalMeetingTime %></td>
+                        <%}%>
+                    </tr>
+                <%})%>
+            </tbody>
+        </table>
+    </div>
+    <div class="subtotal">
+        <table>
+            <thead>
+                <tr>
+                    <th>Project ID</th>
+                    <th>Project</th>
+                    <th>Total Meetings</th>
+                    <th>Total MeetingTime(in Minutes)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% projectMeetingStats.forEach(project=>{%>
+                    <tr>
+                        <% if(project.project!==undefined){%>
+                            <td><%=project.project_id%></td>
+                            <td><%=project.project%></td>
+                            <td><%=project.numMeetings%></td>
+                            <td><%=project.totalMeetingTime%></td>
+                        <%}%>
+                    </tr>
+                <%})%>
+            </tbody>
+        </table>
+    </div>
+    <div class="ff">
+        <h5>Average Meeting Time(in Minutes): <%=averageExecutiveMeetingTime%></h5>
+    </div>
+</div>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js'></script>
+<div class="hist">
+    <canvas id="histogram" width="200" height="200"></canvas>
+    <canvas id="histogram1" width="200" height="200"></canvas>
+</div>
+<% console.log(averageExecutiveMeetingTime)%>
+<script>
+    // Get data from EJS variables
+    //const executiveMeetingTimeStats=JSON.parse(`<%executiveMeetingTimeStats%>`);
+    const labels = JSON.parse(`<%-JSON.stringify(labels)%>`);
+    const data = JSON.parse(`<%-JSON.stringify(data)%>`);
+    const labels1 = JSON.parse(`<%-JSON.stringify(labels1)%>`);
+    const data1 = JSON.parse(`<%-JSON.stringify(data1)%>`);
+    const ctx = document.getElementById('histogram').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Meeting Time (in Minutes)',
+                data: data,
+                backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                   ticks: {
+                     beginAtZero: true
+                   }
+                }]
+            }
+        }
+    });
+    const ctx1 = document.getElementById('histogram1').getContext('2d');
+    const chart1 = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+            labels: labels1,
+            datasets: [{
+                label: 'Meeting Time (in Minutes)',
+                data: data1,
+                backgroundColor: 'rgba(0, 128, 0, 0.2)',
+                borderColor: 'rgba(0, 128, 0, 1)',
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                   ticks: {
+                     beginAtZero: true
+                   }
+                }]
+            }
+        }
+    });
+</script>

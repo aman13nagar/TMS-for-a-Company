@@ -1,0 +1,20 @@
+<%-include("Partials/header")-%>
+<style>
+  body{
+    background-image: url('https://images.pexels.com/photos/3801167/pexels-photo-3801167.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');
+    
+  }
+</style>
+<nav class="navbar navbar-expand-lg navbar-light bg-dark">
+    <button class="navbar-toggler" type="button"  data-toggle="collapse" data-target="#navbarTogglerDemo03" aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <a class="navbar-brand" href="#">TMS</a>
+    <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
+      <form class="form-inline my-2 my-lg-0" action="/home-guestlogin" method="POST">
+        <input class="form-control mr-sm-2" type="text" placeholder="Username" name="username" autocomplete="off" required>
+        <input class="form-control mr-sm-2" type="password" placeholder="Password" name="password" autocomplete="off" required>
+        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Sign In</button>
+      </form>
+    </div>
+  </nav>

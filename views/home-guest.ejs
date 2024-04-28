@@ -1,0 +1,50 @@
+<%-include("home-guestlogin")-%>
+<link rel="stylesheet" href="/style.css">
+  <div class="Form-container">
+    <form action="/" method="POST">
+        <div class="box" >
+            <div class="mb-3">
+                <label class="form-label" for="inputText">Username</label>
+                <input type="text" class="form-control" placeholder="Pick a Username" name="username" autocomplete="off" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="inputEmail">Email</label>
+                <input type="email" class="form-control" placeholder="Email" name="mail" autocomplete="off" required>
+            </div>
+            <div class="input-group mb-3">
+                <div class="ph">
+                    <label class="form-label">Phone No.</label>
+                    <div class="lh">
+                        <button class="btn btn-outline-secondary dropdown-toggle bg-dark" type="button" data-bs-toggle="dropdown" aria-expanded="false">+91</button>
+                        <ul class="dropdown-menu">
+                          <li><a class="dropdown-item" href="#">Action</a>+92</li>
+                          <li><a class="dropdown-item" href="#">Another action</a>+101</li>
+                          <li><a class="dropdown-item" href="#">Something else here</a>+887</li>
+                          <li><hr class="dropdown-divider">+777</li>
+                          <li><a class="dropdown-item" href="#">Separated link</a>+001</li>
+                        </ul>
+                        <input type="tel" class="form-control" name="mobile" autocomplete="off" required>
+                    </div>
+                </div>
+              </div>
+            <div class="mb-3">
+                <label class="form-label" for="inputPassword">Password</label>
+                <input type="password" class="form-control" placeholder="Create password" name="password" required>
+            </div>
+            <!-- <div class="mb-3">
+                <label class="form-label" for="inputPassword">Password</label>
+                <input type="password" id="inputPassword6" class="form-control" placeholder="Create password" aria-describedby="passwordHelpInline" name="password">
+              </div>
+              <div class="mb-3">
+                <span id="passwordHelpInline" class="form-text">
+                  Must be 8-20 characters long.
+                </span>
+              </div> -->
+            <div class="vr">
+              <h1>Already have an account? <a href="/home-guestlogin"> Login</a></h1>
+            </div>
+            <button type="submit" class="btn btn-primary">Sign up</button>
+        </div>
+    </form>
+  </div>
+<%-include("Partials/footer")-%>

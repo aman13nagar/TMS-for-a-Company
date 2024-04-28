@@ -1,0 +1,67 @@
+<%-include("Partials/header")-%>
+<style>
+    body{
+      background:url('https://images.pexels.com/photos/956999/milky-way-starry-sky-night-sky-star-956999.jpeg?auto=compress&cs=tinysrgb&w=600');
+    }
+</style>
+<link rel="stylesheet" href="/style.css">
+<nav class="navbar navbar-expand-lg navbar-light bg-dark">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo03" aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <a class="navbar-brand" href="/home-dashboard">TMS</a>
+    <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
+      <form class="form-inline my-2 my-lg-0" action="/home-dashboard" method="POST">
+        <div>
+          <a href="/Profile"><svg xmlns="http://www.w3.org/2000/svg" height="40" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 30 16">
+            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+            <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
+          </svg></a>
+        </div>
+          <!-- <div class="post_btn"><a class="btn btn-dark btn-lg mr-sm-2" href="/Create-post" role="button">Create Post</a></div> -->
+        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Sign Out</button>
+      </form>
+    </div>
+</nav>
+<style>
+  .box .b{
+    display:flex;
+    place-content: center;
+    border:0.1cm green;
+  }
+  .box .b a{
+    color:white;
+    font-size:0.5cm;
+    text-decoration: none;
+    margin-top:20px;
+    border:0.1cm white;
+  }
+</style>
+    
+    <div id="calendar"></div>
+    <div class="Form-container">
+      <form id="leaveform" action="/leave" method="POST"> 
+          <div class="box" >
+              <div class="mb-3">
+                <label for="inputDate" class="form-label">Start Date:</label>
+                <input type="datetime-local" id="startdate" class="form-control" name="startDate" required>
+              </div>
+              <div class="mb-3">
+                <label for="inputDate" class="form-label">end Date:</label>
+                <input type="datetime-local" id="enddate" class="form-control" name="endDate" required>
+              </div>
+              <div class="mb-3">
+                <label for="inputText" class="form-label">Reason:</label>
+                <input type="text" id="purpose" class="form-control" name="purpose" required>
+              </div>
+              <div class="mb-3">
+                <label for="inputText" class="form-label">Attach google drive link of the documents for proof:</label>
+                <input type="text" id="document" class="form-control" name="document" required>
+              </div>
+              <button type="submit" class="btn btn-primary">Apply for Leave</button>
+              <div class="b">
+                <a href="/checkleaves">Check your leaves</a>
+              </div>
+          </div>
+      </form>
+    </div>

@@ -1,0 +1,113 @@
+<%-include("Partials/header")-%>
+<style>
+    body{
+      background:url('https://images.pexels.com/photos/956999/milky-way-starry-sky-night-sky-star-956999.jpeg?auto=compress&cs=tinysrgb&w=600');
+    }
+</style>
+<link rel="stylesheet" href="/style.css">
+<nav class="navbar navbar-expand-lg navbar-light bg-dark">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo03" aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <a class="navbar-brand" href="/home-dashboard">TMS</a>
+    <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
+      <form class="form-inline my-2 my-lg-0" action="/home-dashboard" method="POST">
+        <div>
+          <a href="/Profile"><svg xmlns="http://www.w3.org/2000/svg" height="40" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 30 16">
+            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+            <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
+          </svg></a>
+        </div>
+          <!-- <div class="post_btn"><a class="btn btn-dark btn-lg mr-sm-2" href="/Create-post" role="button">Create Post</a></div> -->
+        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Sign Out</button>
+      </form>
+    </div>
+  </nav>
+  <style>
+    .userdetails{
+        color:white;
+        display:flex;
+        place-content: center;
+        margin-top:200px;
+    }
+    .userdetails .user{
+        border:0.2cm solid green;
+        border-radius:0.5cm;
+        background-color: black;
+    }
+    .prf{
+        display:flex;
+        flex-wrap:wrap;
+        flex-direction: column;
+        place-content: center;
+    }
+    .user h2{
+        color:#58d8d8;
+        margin-top:15px;
+        display:flex;
+        place-content: center;
+    }
+    .user h5{
+      color:#e891bd;
+      margin-left:20px;
+      margin-right:20px;
+    }
+    .prf img{
+      margin-top:30px;
+    }
+    .prf .beu{
+      display:flex;
+      flex-wrap:wrap;
+      flex-direction: column;
+      margin-left:50px;
+    }
+    .prf svg{
+      border-radius: 100%;
+      height:100px;
+      width:100px;
+      margin-left:25px;
+    }
+    .prf .beu .ba{ 
+      margin-right: 50px;
+      margin-top: -20px;
+      margin-bottom: -10px;
+    }
+    .prf .beu .ba a{
+      color:white;
+      text-decoration: none;
+    }
+    .prf a{
+      text-decoration: none;
+      color:white;
+    }
+    .userdetails .user .prf .rounded-image{
+      border-radius: 100%;
+      height:100px;
+      width:100px;
+    }
+  </style>
+   <% user.forEach(person => { %>
+    <div class="userdetails">
+      <div class="user">
+        <div class="prf">
+            <% if(profile.length==0||profile[profile.length-1].profilePictureUrl==undefined){%>
+              <div class="beu">
+                <svg xmlns="http://www.w3.org/2000/svg" height="40" fill="currentColor" class="bi bi-person-circle " viewBox="0 0 30 16">
+                  <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+                  <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
+                </svg>
+                <div class="ba"><a href="upload-profile-picture">Upload image?</a></div>
+              </div>
+           <% } else{%>
+            <% const url = profile[profile.length-1].profilePictureUrl.replace(/\\/g, '/')%>;
+            <% console.log(url)%>
+            <img src="<%=url%>" height="40" class="rounded-image">
+            <a href="upload-profile-picture">Update image?</a>
+           <% }%>
+          </div>
+        <h2><%= person.username%></h2>
+        <h5>Email: <%= person.email %></h5>
+        <h5>Phone.No: <%= person.phone_no%></h5>
+      </div>
+    </div>
+  <% }); %>
