@@ -39,7 +39,7 @@ app.use(session({
   secret: "Our little secret.",
   resave: false,
   saveUninitialized: false,
-  store: MongoStore.create({ mongoUrl: 'mongodb://127.0.0.1/ourDB' }),
+  store: MongoStore.create({ mongoUrl: 'mongodb+srv://aman13nagar:MvuudGm2Z0LsjwIY@cluster0.e3nardl.mongodb.net/TMS' }),
   cookie: { secure: false, maxAge: 12 * 60 * 60 * 1000 }
 }))
 app.use(flash());
