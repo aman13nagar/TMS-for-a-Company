@@ -1,0 +1,60 @@
+<!-- views/error.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f2f2f2;
+      margin: 0;
+    }
+    .error-container {
+      text-align: center;
+      padding: 20px;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+    .error-title {
+      font-size: 2.5em;
+      color: #e74c3c;
+    }
+    .error-message {
+      font-size: 1.2em;
+      margin: 20px 0;
+    }
+    .error-action {
+      margin-top: 20px;
+    }
+    .error-action a {
+      text-decoration: none;
+      color: #3498db;
+      font-weight: bold;
+      border: 2px solid #3498db;
+      padding: 10px 20px;
+      border-radius: 5px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .error-action a:hover {
+      background-color: #3498db;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="error-container">
+    <div class="error-title"><%= title %></div>
+    <div class="error-message"><%= message %></div>
+    <div class="error-action">
+      <a href="<%= redirectUrl %>">Go Back</a>
+    </div>
+  </div>
+</body>
+</html>

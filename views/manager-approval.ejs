@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manager Approval Requests</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    width: 80%;
+    margin: auto;
+    overflow: hidden;
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+}
+
+.leave-request {
+    background: #fff;
+    padding: 20px;
+    margin: 10px 0;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.leave-request h3 {
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+.leave-request p {
+    margin: 5px 0;
+    color: #666;
+}
+
+.btn {
+    padding: 10px 15px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-approve {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.btn-reject {
+    background-color: #f44336;
+    color: white;
+}
+
+    </style>
+    <div class="container">
+        <h1>Pending Leave Requests</h1>
+        <div id="leave-requests">
+            <% if(leaveRequests.length>0){%>
+                <% leaveRequests.forEach(request => { %>
+                    <% if(request&&request.user){%>
+                        <div class="leave-request">
+                            <h3><%= request.user.username %></h3>
+                            <p>From: <%= new Date(request.start).toLocaleDateString() %></p>
+                            <p>To: <%= new Date(request.end).toLocaleDateString() %></p>
+                            <p>Reason: <%= request.reason %></p>
+                            <button class="btn btn-approve" onclick="approveLeave('<%= request._id %>')">Approve</button>
+                            <button class="btn btn-reject" onclick="rejectLeave('<%= request._id %>')">Reject</button>
+                        </div>
+                    <%}%>
+                <% }) %>
+            <%}%>
+        </div>
+    </div>
+    <script>
+        function approveLeave(id) {
+            fetch(`approve-leave/${id}`, { method: 'POST' })
+                .then(response => response.text())
+                .then(data => {
+                    alert(data);
+                    location.reload();
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function rejectLeave(id) {
+            fetch(`reject-leave/${id}`, { method: 'POST' })
+                .then(response => response.text())
+                .then(data => {
+                    alert(data);
+                    location.reload();
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>

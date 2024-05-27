@@ -1,83 +1,725 @@
 <%-include("Partials/header")-%>
-<style>
-  body{
-    background:url('https://images.pexels.com/photos/956999/milky-way-starry-sky-night-sky-star-956999.jpeg?auto=compress&cs=tinysrgb&w=600');
-  }
-</style>
-<link rel="stylesheet" href="/style.css">
-<nav class="navbar navbar-expand-lg navbar-light bg-dark">
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo03" aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://kit.fontawesome.com/a076d05399.js"></script>
+<link href="/css/home-dashboard.css" rel="stylesheet">
+<header style="position:fixed;z-index:1000;width:100vw;top:0;background-color: #d6d6d6;">
+  <nav class="navbar navbar-expand-lg navbar-light" style="height:80px;">
+    <a class="navbar-brand" href="#" style="color:black;font-size:xx-large">TMS</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation" id="navbtn">
+        <span class="navbar-toggler-icon"></span>
     </button>
-    <a class="navbar-brand" href="/home-dashboard">TMS</a>
-    <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
-      <form class="form-inline my-2 my-lg-0" action="/home-dashboard" method="POST">
-        <div>
-          <a href="/profile"><svg xmlns="http://www.w3.org/2000/svg" height="40" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 30 16">
-            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
-            <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
-          </svg></a>
-        </div>
-          <!-- <div class="post_btn"><a class="btn btn-dark btn-lg mr-sm-2" href="/Create-post" role="button">Create Post</a></div> -->
-        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Sign Out</button>
-      </form>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav mx-auto n1">
+            <li class="nav-item" style="width: 100%;">
+                <form class="form-inline my-2 my-lg-0 position-relative" id="searchForm" onsubmit="return false;">
+                    <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" id="searchInput" style="width: 100%;">
+                    <button class="btn btn-link" type="button" onclick="searchContent()">
+                      <i class="fa fa-search" aria-hidden="true"></i>
+                    </button>
+                </form>
+            </li>
+        </ul>
+        <ul class="navbar-nav ml-auto n2" style="margin-right:1%">
+          <div class="notification-icon">
+            <a href="#" id="notificationDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-bell"></i>
+                <span class="notification-count" id="notificationCount">0</span>
+            </a>
+            <div class="dropdown-menu notifications-dropdown" aria-labelledby="notificationDropdown">
+                <div id="notificationsList"></div>
+            </div>
+          </div>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color:black;">
+                    <%=cuser.username%>
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="profile"><i class="fa-solid fa-user"></i> Profile</a>
+                    <a class="dropdown-item" href="settings"><i class="fa-solid fa-gear"></i> Settings</a>
+                    <div class="dropdown-divider"></div>
+                    <form action="/home-dashboard" method="POST">
+                      <button class="btn btn-outline-success my-2 my-sm-0" type="submit" style="margin-left:15%">Sign Out</button>
+                    </form>
+                </div>
+            </li>
+            <% if(cuser.profilePictureUrl==undefined){%>
+              <a data-toggle="modal" data-target="#uploadProfileModal" style="cursor:pointer;">
+                <svg xmlns="http://www.w3.org/2000/svg" height="40" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 30 16">
+                  <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+                  <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
+                </svg>
+              </a>
+            <%}else{%>
+              <a data-toggle="modal" data-target="#uploadProfileModal" style="cursor:pointer;">
+                <img src='<%=cuser.profilePictureUrl%>' style="height:40px;width:40px;border-radius: 50%;">
+              </a>
+            <%}%>
+        </ul>
     </div>
   </nav>
-  <div class="fr">
-    <div class="wr">
-      <div class="card">
-        <img src="https://media.istockphoto.com/id/1066557736/photo/passionate-about-their-project.jpg?s=612x612&w=0&k=20&c=QD-sh7a57qKNmpsf-_xVI74h-NTJEEWW0S1XrtP6L1U=" class="card-img-top" alt="...">
-      
-        <div class="card-body">
-          <h5 class="card-title">Find Common Slot</h5>
-          <p class="card-text">It analyzes the availability of each participant and suggests available time slots where everyone is free to attend.</p>
-          <a href="/find_slots" class="btn btn-primary">Find Slot</a>
-        </div>
-      </div>
-      <div class="card">
-        <img src="https://media.istockphoto.com/id/1091264928/photo/calendar-app-on-tablet-computer-with-planning-of-the-week-with-appointments-events-tasks-and.jpg?s=612x612&w=0&k=20&c=4W2_K0Wcita3AT-YICkdPTQcPVzpRMv3mGwaFiZlmLs=" class="card-img-top" alt="...">
-      
-        <div class="card-body">
-          <h5 class="card-title">Schedule Meeting</h5>
-          <p class="card-text">With the scheduling meeting functionality, users can easily set up and organize meetings with other individuals or groups</p>
-          <a href="/schedule" class="btn btn-primary">Schedule</a>
-        </div>
-      </div>
-      <div class="card">
-        <img src="https://media.istockphoto.com/id/1217082959/photo/creative-abstract-postal-envelopes-sketch-on-modern-laptop-background-e-mail-and-marketing.jpg?s=612x612&w=0&k=20&c=eZtPEGhYYPXNGZ4Gdt9S-iMxSKrAMd8xe0u40SHkVvg=" class="card-img-top" alt="...">
-      
-        <div class="card-body">
-          <h5 class="card-title">Check Appointments</h5>
-          <p class="card-text">Users can view their upcoming appointments and meetings using the check appointments feature. They can see details such as date, time, location ,etc. </p>
-          <a href="/check_appointments" class="btn btn-primary">Appointments</a>
-        </div>
-      </div>
-    </div>
-    <div class="wr">
-      <div class="card">
-        <img src="https://media.istockphoto.com/id/1358091848/photo/corporate-data-management-system-and-document-management-system-with-employee-privacy.jpg?s=2048x2048&w=is&k=20&c=MvwrXqq0lmhwsTbSBz82aQHf9VE4f3twiXxFfjH4bj0=" class="card-img-top" alt="...">
-        <div class="card-body">
-          <h5 class="card-title">Mark Leave</h5>
-          <p class="card-text">This functionality allows users to mark their leaves or absences from work or other commitments.They can specify the start and end dates of their leave.</p>
-          <a href="/leave" class="btn btn-primary">Mark leave</a>
-        </div>
-      </div>
-      <div class="card">
-        <img src="https://media.istockphoto.com/id/1407983911/photo/forex-diagrams-and-stock-market-rising-lines-with-numbers.jpg?s=612x612&w=0&k=20&c=zas1h6LR6v2iCvE7SWnVoZ_s7ZSiboN45UK0d5oMWac=" class="card-img-top" alt="...">
-        <div class="card-body">
-          <h5 class="card-title">Statistics</h5>
-          <p class="card-text">Users can access statistical data related to their activities, appointments, or meetings using the check statistics feature. </p>
-          <a href="/statistics" class="btn btn-primary">Check Statistics</a>
-        </div>
-      </div>
-      <div class="card">
-        <img src="https://media.istockphoto.com/id/1263039069/vector/female-patient-chooses-doctor-doctors-team-medical-staff-portraits-online-service-searching.jpg?s=612x612&w=0&k=20&c=qXfs9B7xGmehrAcLJ5ShC8pikLVwvq2FxDV3tvlyIk4=" class="card-img-top" alt="...">
-        <div class="card-body">
-          <h5 class="card-title">Profile</h5>
-          <p class="card-text">The check profile feature enables users to view and manage their personal profiles within the system.They can update their Profile.</p>
-          <a href="/profile" class="btn btn-primary">Check Profile</a>
-        </div>
-      </div>
+</header>
+
+<div class="sidebar-container">
+  <div class="sidebar" id="sidebar">
+    <button class="toggle-btn" id="toggleBtn">&#9776;</button>
+    <div class="sidebar-content">
+        <ul>
+            <% if(cuser.role=='manager'){%>
+              <div class="homedashboard">
+                <li class="hom"><i class="fa-solid fa-house"></i> <a href="home-dashboard"> Dashboard</a></li>
+                <li class="not"><i class="fa fa-bell"></i> <a href="notifications"> Notifications</a></li>
+              </div>
+              <li><i class="fa-solid fa-cart-plus"></i> <a href="manager/tasks"> Task Creation</a></li>
+              <li><i class="fa-solid fa-list-check"></i> <a href="manager/edit-task"> Tasks</a></li>
+              <li><i class="fa-solid fa-bars-progress"></i> <a href="projects"> Projects</a></li>
+              <li><i class="fa-solid fa-check-to-slot"></i> <a href="find_slots"> Find Open Slot</a></li>
+              <li><i class="fa-solid fa-calendar-days"></i> <a href="scheduleMeeting"> Schedule Meeting</a></li>
+              <li><i class="fa-regular fa-handshake"></i><a href="Meeting/showmeetings"> Your Scheduled Meetings</a></li>
+              <li><i class="fa-solid fa-holly-berry"></i> <a href="Leave/pending-leave-requests"> Approve Leave</a></li>
+              <li><i class="fa-solid fa-message"></i> <a href="#team-collaboration"> Real time messaging</a></li>
+              <li><i class="fa-solid fa-user-group"></i> <a href="groups"> Team Channels or Groups</a></li>
+              <li><i class="fa-solid fa-comments"></i> <a href="group-chat"> Group Discussion</a></li>
+              <div>
+                <li><i class="fa-regular fa-comment"></i> <a href="#feedback-form"> Polls and Surveys</a></li>
+                <li><i class="fa-solid fa-gear"></i> <a href="settings"> Settings</a></li>
+              </div>
+            <%}else{%>
+              <div class="homedashboard">
+                <li><i class="fa-solid fa-house"></i> <a href="/home-dashboard"> Dashboard</a></li>
+                <li><i class="fa fa-bell"></i> <a href="notifications"> Notifications</a></li>
+              </div>
+              <li><i class="fa-solid fa-list-check"></i> <a href="employee/tasks"> Tasks</a></li>
+              <li><i class="fa-solid fa-bars-progress"></i> <a href="projects"> Projects</a></li>
+              <li><i class="fa-solid fa-check-to-slot"> </i><a href="find_slots"> Find Open Slot</a></li>
+              <li><i class="fa-solid fa-calendar-days"> </i><a href="scheduleMeeting"> Schedule Meeting</a></li>
+              <li><i class="fa-regular fa-handshake"></i> <a href="Meeting/showmeetings"> Your Scheduled Meetings</a></li>
+              <li><i class="fa-solid fa-holly-berry"></i> <a href="LeaveRequest"> Mark Leave</a></li>
+              <li><i class="fa-solid fa-chart-simple"></i> <a href="statistics"> Statistics</a></li>
+              <li><i class="fa-solid fa-message"> </i><a href="#team-collaboration"> Real time messaging</a></li>
+              <li><i class="fa-solid fa-user-group"> </i><a href="groups"> Team Channels or Groups</a></li>
+              <li><i class="fa-solid fa-comments"></i> <a href="group-chat"> Group Discussion</a></li>
+              <div>
+                <li><i class="fa-regular fa-comment"></i> <a href="#feedback-form"> Polls and Surveys</a></li>
+                <li><i class="fa-solid fa-gear"></i> <a href="settings"> Settings</a></li>
+              </div>
+            <%}%>
+        </ul>
     </div>
   </div>
-  <%-include("Partials/footer")-%>
+</div>
+<div class="dashboard-container" id="dashboardContainer">
+  <div class="modal3" id="greetingModal">
+    <div class="modal-content3">
+        <span class="close-button3">&times;</span>
+        <h2>Great to Have You Back, <%= cuser.username %>!</h2>
+        <p>Let's dive into a productive day. Your tasks are waiting, and success is just a click away.</p>
+        <button id="closeModalBtn3" class="btn btn-primary">Start Your Day</button>
+    </div>
+</div>
+  <header class="dashboard-header">
+      <h1>Hey, <%= cuser.username %>!</h1>
+      <p>Your personal time management assistant</p>
+  </header>
+  
+  <div class="dashboard-content">
+      <div class="overview">
+          <h2>Overview</h2>
+          
+          <div class="stats">
+             <% if(cuser.role=='manager'){%>
+              <div class="stat">
+                <h3>Created Tasks</h3>
+                <p id="taskCount"><%=cuser.totalTasks%></p>
+              </div>
+             <%}else{%>
+              <div class="stat">
+                <h3>Total Tasks</h3>
+                <p id="taskCount"><%=cuser.totalTasks%></p>
+              </div>
+             <%}%>
+              <div class="stat">
+                  <h3>Meetings</h3>
+                  <p id="MeetingCount"><%=cuser.totalMeetings%></p>
+              </div>
+              <div class="stat">
+                  <h3>Completed Tasks</h3>
+                  <p id="completetaskCount"><%=cuser.CompletedTasks%></p>
+              </div>
+              <% if(cuser.role=='employee'){%>
+                <div class="stat">
+                  <h3>Your Leaves</h3>
+                  <p id="leaves"><%=cuser.totalLeaves%></p>
+                </div>
+              <%}%>
+          </div>
+      </div>
+
+      <div class="charts">
+        <h2>Productivity Insights</h2>
+        <canvas id="taskChart"></canvas>
+        <div class="chart-buttons">
+            <button onclick="updateChart('taskChart', 'daily')">Daily</button>
+            <button onclick="updateChart('taskChart', 'monthly')">Monthly</button>
+            <button onclick="updateChart('taskChart', 'yearly')">Yearly</button>
+        </div>
+        <canvas id="meetingChart"></canvas>
+        <div class="chart-buttons">
+            <button onclick="updateChart('meetingChart', 'daily')">Daily</button>
+            <button onclick="updateChart('meetingChart', 'monthly')">Monthly</button>
+            <button onclick="updateChart('meetingChart', 'yearly')">Yearly</button>
+        </div>
+    </div>
+
+      <div class="quick-actions">
+          <h2>Quick Actions</h2>
+          <% if(cuser.role=='manager'){%>
+            <button onclick="window.location.href='manager/tasks'">Create Task</button>
+          <%}else{%>
+            <button onclick="window.location.href='employee/tasks'">View Tasks</button>
+          <%}%>
+          <button onclick="window.location.href='scheduleMeeting'">Schedule Meeting</button>
+      </div>
+
+      <div class="tips">
+          <h2>Tips & Best Practices</h2>
+          <p>Check out our latest tips on how to manage your time effectively and boost your productivity.</p>
+          <ul>
+              <li><a href="#">How to prioritize your tasks effectively</a></li>
+              <li><a href="#">Best practices for remote meetings</a></li>
+              <li><a href="#">Using our software to maximize efficiency</a></li>
+          </ul>
+      </div>
+  </div>
+</div>
+<section id="team-collaboration"style="padding:50px 0;width:100vw">
+  <div class="row">
+    <div class="group" style="cursor: pointer;">
+        <ul class="list-group">
+            <%if(users.length>0){%>
+                    <%for(let i=0;i<users.length;i++){%>
+                      <%let innerString = cuser._id.toString()%>
+                      <%let innerString2= users[i]['_id'].toString()%>
+                      <%let hexString = innerString.substring(0, innerString.length)%>
+                      <%let hexString2= innerString2.substring(0, innerString2.length)%>
+                      <%console.log(hexString)%>
+                      <%console.log(hexString2)%>
+                        <% if(hexString===hexString2){%>
+                          <div class="c-user" style="display:none">
+                            <li class="list-group-item list-group-item-dark cursor-pointer user-list" data-id="<%=users[i]['_id']%>" style="display:flex">
+                              <svg xmlns="http://www.w3.org/2000/svg" height="40" fill="currentColor" class="bi bi-person-circle " viewBox="0 0 30 16" style="margin-right:-25px">
+                                <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+                                <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
+                              </svg>
+                              <div style="margin-top:8px"><%=users[i]['username']%>(me)</div>
+                            </li>
+                          </div>
+                        <%}else{%>
+                          <div class="c-user">
+                            <li class="list-group-item list-group-item-dark cursor-pointer user-list" data-id="<%=users[i]['_id']%>">
+                              <% if(users[i].profilePictureUrl===undefined){%>
+                                <svg xmlns="http://www.w3.org/2000/svg" height="40" fill="currentColor" class="bi bi-person-circle " viewBox="0 0 30 16" style="margin-right:-25px">
+                                  <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+                                  <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
+                                </svg>
+                              <%}else{%>
+                                <img src="<%= users[i].profilePictureUrl %>" height="40" style="height:40px;width:40px;border-radius: 50%;margin-right:3%">
+                              <%}%>
+                              <%=users[i]['username']%>
+                              <%if(users[i]['is_online']==1){%>
+                                  <sup class="online-status" id="<%=users[i]['_id'] %>-status">Online</sup>
+                              <%}else{%>
+                                  <sup class="offline-status" id="<%=users[i]['_id']%>-status">Offline</sup>
+                              <%}%>
+                            </li>
+                          </div>
+                        <%}%>
+                        
+                    <%}%>
+                <%}%>
+        </ul>
+    </div>
+    <div class="message-container">
+      <div class="start-head">
+        <h5><i class="fas fa-comments"></i> Hey, <%= cuser.username %> <i class="fa-regular fa-face-smile" style="color:red"></i></h5>
+        <div class="profile-container">
+          <img src="/uploads/AdobeStock_226771742_Preview.jpeg" class="profile-img-small">
+          <img src="/uploads/AdobeStock_404410054_Preview.jpeg" class="profile-img-large">
+      </div>
+      <div class="intro-text">
+          <p>Our chat feature allows you to communicate with your colleagues instantly. Here are some of the key features:</p>
+          <ul>
+              <li>One-to-One Messaging</li>
+              <li>Real-Time Updates</li>
+          </ul>
+          <p>Click on the chat icon above to start a conversation. Happy chatting!</p>
+      </div>
+      </div>     
+        <div class="chat-section">
+            <div id="chat-container" style="border:1px solid green;">
+            </div>
+            <form action="" id="chat-form" class="" style="margin-top:10px">
+                <input type="text" name="message" placeholder="Enter Message" id="message" required style="height: 50px;border-radius:5px;width:50%">
+                <button type="submit" class="btn btn-primary" style="margin-left:20%;margin-top:-10px">Send <i class="fa-solid fa-paper-plane"></i></button>
+            </form>
+        </div>
+    </div>
+  </div>
+</section>
+<section class="feedback" id="feedback-form">
+  <div class="feedback-container">
+    <h2>We Value Your Feedback</h2>
+    <form action="" method="POST" id="feedback-form">
+        <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" placeholder="Your name" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="Your email" required>
+        </div>
+        <div class="form-group">
+            <label for="rating">Rating</label>
+            <select id="rating" name="rating" required>
+                <option value="5">Excellent</option>
+                <option value="4">Very Good</option>
+                <option value="3">Good</option>
+                <option value="2">Fair</option>
+                <option value="1">Poor</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="comments">Comments</label>
+            <textarea id="comments" name="comments" placeholder="Your comments" required></textarea>
+        </div>
+        <button type="submit" class="submit-btn">Submit Feedback</button>
+    </form>
+  </div>
+</section>
+<!-- Modal -->
+<div class="modal" id="deleteChatModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">Delete Chat</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form action="" id="delete-chat-form">
+        <div class="modal-body">
+          <input type="hidden" name="id" id="delete-message-id">
+          <p>Are you sure you want to delete below message?</p>
+          <div style="word-wrap: break-word;"><p id="delete-message" style="width:-webkit-fill-available;font-weight: bold;"></p></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="editChatModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">Edit Chat</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form action="" id="update-chat-form">
+        <div class="modal-body">
+          <input type="hidden" name="id" id="edit-message-id">
+          <input type="text" name="message" id="update-message" required placeholder="Enter Message"> 
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Edit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="uploadProfileModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">Upload Image</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form action="" id="profilePictureForm" enctype="multipart/form-data">
+        <div class="modal-body">
+          <input type="hidden" name="id" id="upload-id">
+          <input class="form-label" type="file" id="profilePictureInput" name="profilePicture" accept="image/*" required>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Upload</button>
+        </div>
+      </form>
+      <div id="upload-message-id"></div>
+    </div>
+  </div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+  var notificationDropdown = document.getElementById('notificationDropdown');
+  var navbarDropdown = document.getElementById('navbarDropdown');
+
+  notificationDropdown.addEventListener('click', function(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    var notificationsDropdownMenu = document.querySelector('.notifications-dropdown');
+    if (notificationsDropdownMenu.classList.contains('show')) {
+      notificationsDropdownMenu.classList.remove('show');
+    } else {
+      notificationsDropdownMenu.classList.add('show');
+    }
+  });
+
+  navbarDropdown.addEventListener('click', function(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    var profileDropdownMenu = this.nextElementSibling;
+    if (profileDropdownMenu.classList.contains('show')) {
+      profileDropdownMenu.classList.remove('show');
+    } else {
+      profileDropdownMenu.classList.add('show');
+    }
+  });
+
+  document.addEventListener('click', function() {
+    var notificationsDropdownMenu = document.querySelector('.notifications-dropdown');
+    if (notificationsDropdownMenu.classList.contains('show')) {
+      notificationsDropdownMenu.classList.remove('show');
+    }
+    var profileDropdownMenu = document.querySelector('.dropdown-menu.show');
+    if (profileDropdownMenu) {
+      profileDropdownMenu.classList.remove('show');
+    }
+  });
+});
+
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
+<script>
+
+  document.addEventListener("DOMContentLoaded", function() {
+    const sidebar = document.getElementById("sidebar");
+    const toggleBtn = document.getElementById("toggleBtn");
+    const dashboardContainer = document.getElementById("dashboardContainer");
+
+    toggleBtn.addEventListener("click", function() {
+        sidebar.classList.toggle("open");
+        dashboardContainer.classList.toggle("collapsed");
+    });
+      const modal = document.getElementById("greetingModal");
+      const closeButton = document.querySelector(".close-button3");
+      const closeModalBtn = document.getElementById("closeModalBtn3");
+      modal.style.display = "block";
+      closeButton.addEventListener("click", function() {
+        modal.style.display = "none";
+      });
+      closeModalBtn.addEventListener("click", function() {
+        modal.style.display = "none";
+      });
+      window.addEventListener("click", function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+      });
+    });
+    document.addEventListener("DOMContentLoaded",function(){
+      const navbtn=document.getElementById("navbtn");
+      const navbar=document.getElementById("navbarNav");
+      navbtn.addEventListener("click",function(){
+        navbar.style.display=navbar.style.display==="block"?"none":"block";
+      })
+    })
+</script>
+<script>
+  document.getElementById('profilePictureForm').addEventListener('submit', async function (event) {
+      event.preventDefault();
+      const formData = new FormData();
+      const fileInput = document.getElementById('profilePictureInput');
+      formData.append('profilePicture', fileInput.files[0]);
+      try {
+          const response = await fetch('/upload-profile-picture', {
+              method: 'POST',
+              body: formData
+          });
+
+          const data = await response.json();
+          document.getElementById('upload-message-id').textContent = data.message;
+          location.reload();
+      } catch (error) {
+          console.log('Error uploading profile picture:', error);
+          document.getElementById('upload-message-id').textContent = 'An error occurred while uploading profile picture';
+          location.reload();
+      }
+  });
+  $('#feedback-form').submit(function(event){
+        event.preventDefault();
+        var name=$('#name').val();
+        var email=$('#email').val();
+        var rating=$('#rating').val();
+        var comments=$('#comments').val();
+        console.log(name,email,rating,comments)
+        $.ajax({
+            url:'/Leave/feedback-form',
+            type:'POST',
+            data:{name:name,email:email,rating:rating,comments:comments},
+            success:function(response){
+                if(response.success){
+                    alert('Feedback form submitted successfully');
+                    location.reload();
+                }
+                else{
+                    alert('An error occured when submitting the form');
+                    location.reload();
+                }
+            }
+        })
+      })
+  // JavaScript to handle the search functionality and highlight the content
+function searchContent() {
+    const searchInput = document.getElementById('searchInput').value;
+    removeHighlights(); 
+    if (searchInput) {
+        highlightText(document.body, searchInput);
+        scrollToHighlight();
+    }
+}
+function highlightText(node, text) {
+    const span = document.createElement('span');
+    span.className = 'highlight';
+    const regex = new RegExp(`(${text})`, 'gi');
+    if (node.nodeType === 3) {
+        const match = node.data.match(regex);
+        if (match) {
+            const highlightNode = node.splitText(match.index);
+            highlightNode.splitText(match[0].length);
+            const highlightedText = highlightNode.cloneNode(true);
+            span.appendChild(highlightedText);
+            highlightNode.parentNode.replaceChild(span, highlightNode);
+        }
+    } else if (node.nodeType === 1 && node.childNodes && !/(script|style)/i.test(node.tagName) && node.className !== 'highlight') {
+        for (let i = 0; i < node.childNodes.length; i++) {
+            highlightText(node.childNodes[i], text);
+        }
+    }
+}
+
+function removeHighlights() {
+    const highlights = document.querySelectorAll('.highlight');
+    highlights.forEach(span => {
+        span.outerHTML = span.innerHTML;
+    });
+}
+
+function scrollToHighlight() {
+    const firstHighlight = document.querySelector('.highlight');
+    if (firstHighlight) {
+        firstHighlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+const style = document.createElement('style');
+style.type = 'text/css';
+style.innerHTML = '.highlight { background-color: yellow; }';
+document.head.appendChild(style);
+document.getElementById('searchInput').addEventListener('input', function() {
+    const searchInput = this.value;
+    if (!searchInput) {
+        removeHighlights();
+    }
+});
+</script>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script>
+  $(document).ready(function () {
+            let hasReadNotifications = false;
+
+            $('#notificationDropdown').on('click', function () {
+                $('.notifications-dropdown').toggle();
+                if ($('.notifications-dropdown').is(':visible')) {
+                    if (!hasReadNotifications) {
+                        markAllNotificationsAsRead();
+                        hasReadNotifications = true;
+                    }
+                }
+                $(this).addClass('pendulum');
+                setTimeout(() => {
+                    $(this).removeClass('pendulum');
+                }, 1000);
+            });
+            fetchNotifications();
+            function fetchNotifications() {
+                $.ajax({
+                    url: '/home-dashboard/notifications/<%= cuser._id %>',
+                    method: 'GET',
+                    success: function (notifications) {
+                        const notificationsList = $('#notificationsList');
+                        notificationsList.empty();
+
+                        const unreadNotifications = notifications.filter(notification => !notification.isRead);
+                        if (unreadNotifications.length > 0) {
+                            $('#notificationCount').text(unreadNotifications.length).show();
+                            unreadNotifications.forEach(notification => {
+                                const notificationItem = `
+                                    <div class="dropdown-item">
+                                        <span>${notification.message}</span>
+                                        <button class="btn btn-sm btn-link mark-as-read" data-id="${notification._id}">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                    </div>`;
+                                notificationsList.append(notificationItem);
+                            });
+                            attachMarkAsReadEvent();
+                        } else {
+                            notificationsList.append('<div class="dropdown-item">No new notifications</div>');
+                            $('#notificationCount').hide();
+                        }
+                    }
+                });
+            }
+
+            function attachMarkAsReadEvent() {
+                $('.mark-as-read').click(function () {
+                    const notificationId = $(this).data('id');
+                    $.ajax({
+                        url: `/home-dashboard/notifications/mark-as-read/${notificationId}`,
+                        method: 'POST',
+                        success: function () {
+                            fetchNotifications();
+                        }
+                    });
+                });
+            }
+
+            function markAllNotificationsAsRead() {
+                $.ajax({
+                    url: `/home-dashboard/notifications/mark-all-as-read/<%= cuser._id %>`,
+                    method: 'POST',
+                    success: function () {
+                        $('#notificationCount').hide();
+                    }
+                });
+            }
+        });
+
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+<script src="/socket.io/socket.io.js"></script> 
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      var socket = io('/home-namespace', {
+          auth: {
+              token: '<%= cuser._id %>'
+          }
+      });
+      let ctxMeetings = document.getElementById('meetingChart').getContext('2d');
+      let ctxTasks = document.getElementById('taskChart').getContext('2d');
+      let dailyMeetingData = JSON.parse('<%- JSON.stringify(cuser.dailyData[0]) %>');
+      let monthlyMeetingData = JSON.parse('<%- JSON.stringify(cuser.monthlyData[0]) %>');
+      let yearlyMeetingData = JSON.parse('<%- JSON.stringify(cuser.yearlyData[0]) %>');
+      socket.on('updatestates', (user) => {
+          console.log(user);
+          if (user._id === '<%= cuser._id %>') {
+            document.getElementById('MeetingCount').innerText = user.totalMeetings;
+            document.getElementById('taskCount').innerText=user.totalTasks;
+            document.getElementById('completetaskCount').innerText=user.CompletedTasks;
+            if(user.role=='employee') document.getElementById('leaves').innerText=user.totalLeaves;
+            dailyMeetingData = user.dailyData[0];
+            monthlyMeetingData = user.monthlyData[0];
+            yearlyMeetingData = user.yearlyData[0];
+            updateChart('meetingChart', 'daily');
+            let taskChart = new Chart(ctxTasks, {
+        type: 'bar',
+        data: {
+            labels: ['Completed', 'Pending', 'Overdue'],
+            datasets: [{
+                label: 'Tasks',
+                data:[user.CompletedTasks,user.PendingTasks,user.OverdueTasks],
+                // data: ['completedTasks', 'pendingTasks', 'overdueTasks'],
+                backgroundColor: ['#28a745', '#ffc107', '#dc3545']
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+          }
+      });
+      let meetingChart = new Chart(ctxMeetings, {
+          type: 'line',
+          data: {
+              labels: Object.keys(dailyMeetingData),
+              datasets: [{
+                  label: 'Meeting Time (in Minutes)',
+                  data: Object.values(dailyMeetingData),
+                  backgroundColor: 'rgba(54,162,235,0.5)',
+                  borderColor: 'rgba(54, 162, 235, 1)',
+                  fill: true
+              }]
+          },
+          options: {
+              scales: {
+                  y: {
+                      beginAtZero: true
+                  }
+              }
+          }
+      });
+      // Function to update the chart
+      window.updateChart = function(chartId, view) {
+          let updatedLabels = [];
+          let updatedData = [];
+          let chart, data;
+
+          if (chartId === 'meetingChart') {
+              chart = meetingChart;
+              data = {
+                  daily: dailyMeetingData,
+                  monthly: monthlyMeetingData,
+                  yearly: yearlyMeetingData
+              };
+          } 
+          if (view === 'daily') {
+              updatedLabels = Object.keys(data.daily);
+              updatedData = Object.values(data.daily);
+          } else if (view === 'monthly') {
+              updatedLabels = Object.keys(data.monthly);
+              updatedData = Object.values(data.monthly);
+          } else if (view === 'yearly') {
+              updatedLabels = Object.keys(data.yearly);
+              updatedData = Object.values(data.yearly);
+          }
+
+          chart.data.labels = updatedLabels;
+          chart.data.datasets[0].data = updatedData;
+          chart.update();
+      };
+
+  });
+</script>
+<script src="/js/main.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.js" integrity="sha512-+k1pnlgt4F1H8L7t3z95o3/KO+o78INEcXTbnoJQ/F2VqDVhWoaiVml/OEHv9HsVgxUaVW+IbiZPUJQfF/YxZw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<%-include("Partials/footer")-%>

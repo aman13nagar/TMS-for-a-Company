@@ -1,50 +1,381 @@
-<%-include("home-guestlogin")-%>
-<link rel="stylesheet" href="/style.css">
-  <div class="Form-container">
-    <form action="/" method="POST">
-        <div class="box" >
-            <div class="mb-3">
-                <label class="form-label" for="inputText">Username</label>
-                <input type="text" class="form-control" placeholder="Pick a Username" name="username" autocomplete="off" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label" for="inputEmail">Email</label>
-                <input type="email" class="form-control" placeholder="Email" name="mail" autocomplete="off" required>
-            </div>
-            <div class="input-group mb-3">
-                <div class="ph">
-                    <label class="form-label">Phone No.</label>
-                    <div class="lh">
-                        <button class="btn btn-outline-secondary dropdown-toggle bg-dark" type="button" data-bs-toggle="dropdown" aria-expanded="false">+91</button>
-                        <ul class="dropdown-menu">
-                          <li><a class="dropdown-item" href="#">Action</a>+92</li>
-                          <li><a class="dropdown-item" href="#">Another action</a>+101</li>
-                          <li><a class="dropdown-item" href="#">Something else here</a>+887</li>
-                          <li><hr class="dropdown-divider">+777</li>
-                          <li><a class="dropdown-item" href="#">Separated link</a>+001</li>
-                        </ul>
-                        <input type="tel" class="form-control" name="mobile" autocomplete="off" required>
-                    </div>
-                </div>
+<%-include("Partials/header")-%>
+<style>
+  body {
+    background: #f2f2f2;
+    font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS",
+      sans-serif;
+  }
+  .usr {
+    display: flex;
+    flex-direction: row;
+    place-content: center;
+  }
+  .usr .signup {
+    display: flex;
+    flex-direction: column;
+    place-content: center;
+    background: #fff;
+    margin-top: 50px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    padding:2px;
+  }
+  .Form-container {
+    margin-bottom: 100px;
+    margin-left: 40px;
+    margin-right: 40px;
+    display: flex;
+    margin-top:10%;
+  }
+  .vr {
+    margin-top: 10px;
+  }
+  .vr h1 {
+    font-size: 0.4cm;
+    color: black;
+  }
+  .vr h1 a {
+    color: black;
+  }
+  .Form-container .box {
+    color: black;
+    width: 300px;
+  }
+  .Form-container .box .form-check {
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+  .line-container {
+    position: relative;
+    margin: 20px 0; /* Adjust the margin to position the line */
+  }
+
+  .line {
+    border-color: black;
+    margin: 0; /* Reset margin */
+  }
+
+  .or-text {
+    position: absolute;
+    top: -10px; /* Adjust the vertical position */
+    left: 50%; /* Center horizontally */
+    transform: translateX(-50%); /* Adjust for centering */
+    background-color: white; /* Match background color */
+    padding: 0 10px; /* Add padding for better visibility */
+  }
+  @keyframes fly {
+    0% {
+      transform: translateY(0);
+    }
+    100% {
+      transform: translateY(20px);
+    }
+  }
+  .show {
+    display: flex;
+    /* position: fixed; */
+    flex-wrap: wrap;
+    place-content: center;
+    /* width: 100%; */
+    margin-left: 600px;
+    /* margin-bottom: 40px; */
+    /* height: 100%; */
+    height: 150px;
+    width: 400px;
+    animation: fly 5s forwards;
+  }
+  .modal-content1 {
+    flex-direction: row;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 240px;
+    height: 50px;
+    background-color: rgb(253, 87, 87);
+  }
+  .close {
+    color: black;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    margin-top: -10px;
+  }
+  .modal-content1 p {
+    margin-bottom: 1rem;
+    margin-top: -15px;
+    color: black;
+    font-size: small;
+  }
+  .close:hover,
+  .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .aa {
+    display: flex;
+    flex-direction: row;
+  }
+  .usr .signup .intr {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    flex-direction: column;
+    place-content: center;
+  }
+  .intr h1 {
+    font-weight: 300;
+    font-size: x-large;
+  }
+  .intr .rr {
+    display: flex;
+    flex-direction: row;
+  }
+  .intr .rr1 {
+    margin-left: 40px;
+  }
+  .intr .rr h1 {
+    color: #ff6868;
+    font-weight: bold;
+    font-size: 1.3cm;
+  }
+  .intr .rr img {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+    margin-top: 13px;
+  }
+  .show-hide {
+    cursor: pointer;
+    margin-left: 10px;
+    margin-top: 10px;
+  }
+  .intro {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    margin-left:10%;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 500px;
+  }
+  .intro .imgr img {
+    max-width: 100%;
+    height: 80%;
+    margin-bottom:-5%;
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+  .intro-content {
+    text-align: left;
+  }
+  .intro-content h2 {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  .intro-content p {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 10px;
+    line-height: 1.6;
+  }
+  @media(max-width:670px){
+    .intro{
+      display:none;
+    }
+  }
+</style>
+<div class="usr">
+  <section class="signup" id="sign">
+    <div class="intr">
+      <div class="rr">
+        <img src="https://cdn-icons-png.flaticon.com/512/4285/4285419.png" />
+        <h1>TMS</h1>
+      </div>
+      <div class="rr1">
+        <h1>SignUp</h1>
+      </div>
+    </div>
+    <div class="Form-container">
+      <form action="/home-guest" method="POST">
+        <div class="box">
+          <div class="mb-3">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Enter your Name*"
+              name="username"
+              autocomplete="off"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <input
+              type="email"
+              class="form-control"
+              placeholder="Email*"
+              name="mail"
+              autocomplete="off"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <div class="ph">
+              <div class="lh">
+                <button
+                  class="btn btn-outline-secondary dropdown-toggle bg-dark"
+                  type="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                  style="margin-right: 5px"
+                >
+                  +91
+                </button>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="#">Action</a>+92</li>
+                  <li>
+                    <a class="dropdown-item" href="#">Another action</a>+101
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="#">Something else here</a
+                    >+887
+                  </li>
+                  <li>
+                    <hr class="dropdown-divider" />
+                    +777
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="#">Separated link</a>+001
+                  </li>
+                </ul>
+                <input
+                  type="tel"
+                  class="form-control"
+                  placeholder="Phone no.*"
+                  name="mobile"
+                  autocomplete="off"
+                  required
+                />
               </div>
-            <div class="mb-3">
-                <label class="form-label" for="inputPassword">Password</label>
-                <input type="password" class="form-control" placeholder="Create password" name="password" required>
             </div>
-            <!-- <div class="mb-3">
-                <label class="form-label" for="inputPassword">Password</label>
-                <input type="password" id="inputPassword6" class="form-control" placeholder="Create password" aria-describedby="passwordHelpInline" name="password">
-              </div>
-              <div class="mb-3">
-                <span id="passwordHelpInline" class="form-text">
-                  Must be 8-20 characters long.
-                </span>
-              </div> -->
-            <div class="vr">
-              <h1>Already have an account? <a href="/home-guestlogin"> Login</a></h1>
-            </div>
-            <button type="submit" class="btn btn-primary">Sign up</button>
+          </div>
+          <div class="mb-3">
+            <select id="role" name="role" required>
+              <option value="employee">Employee</option>
+              <option value="manager">Manager</option>
+            </select>
+          </div>
+          <div class="mb-3 aa">
+            <input
+              type="password"
+              class="form-control"
+              id="password"
+              placeholder="Password*"
+              name="password"
+              required
+            />
+            <i
+              class="fa-regular fa-eye show-hide"
+              onclick="togglePassword()"
+            ></i>
+          </div>
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              value=""
+              id="flexCheckDefault"
+              required
+            />
+            <label class="form-check-label" for="flexCheckDefault">
+              By continuing, you are stating that you accept the
+              <a href="#">TMS Terms of Service</a> , have read the
+              <a href="#">Privacy Policy</a>.
+            </label>
+          </div>
+          <button type="submit" class="btn btn-primary">
+            Sign up <i class="fa-solid fa-arrow-right-to-bracket"></i>
+          </button>
+          <div class="vr">
+            <h1>
+              Already have an account? <a href="/home-guestlogin"> Login</a>
+            </h1>
+          </div>
         </div>
-    </form>
+      </form>
+    </div>
+  </section>
+  <section class="intro">
+    <div class="imgr">
+      <img src="/uploads/TMS5.png" alt="Illustration" />
+    </div>
+    <div class="intro-content">
+      <h2>Why Choose TMS?</h2>
+      <p>Task Management System (TMS) helps streamline your workflow.</p>
+      <p>
+        Our platform offers robust features to help you stay on top of your
+        tasks.
+      </p>
+      <p>
+        With TMS, you can prioritize, track, and complete your tasks with ease.
+      </p>
+      <p>
+        Join a community of professionals who trust TMS for their task
+        management needs.
+      </p>
+      <p>
+        Sign up now and experience the difference that TMS can make in your
+        productivity.
+      </p>
+    </div>
+  </section>
+</div>
+<div id="myModal" class="modal <%= messages.error? 'show' : '' %>">
+  <%if(messages.error){%>
+  <div class="modal-content1" id="m-c1">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <p><%=messages.error%></p>
   </div>
+  <%}%>
+</div>
+<script>
+  function closeModal() {
+    var modal = document.getElementById("myModal");
+    if (modal) {
+      modal.style.display = "none";
+    }
+  }
+
+  // Auto-close the modal after 3 seconds
+  if ("<%= messages.error ? true : false %>") {
+    setTimeout(closeModal, 1000);
+  }
+  function redirectTohome() {
+    var rocket = document.getElementById("m-c1");
+    if (rocket) {
+      rocket.style.display = "block";
+      rocket.style.top = "-200px";
+      setTimeout(function () {
+        location.reload();
+      }, 1000);
+    }
+  }
+  function togglePassword() {
+    var passwordInput = document.getElementById("password");
+    var eyeIcon = document.querySelector(".show-hide");
+
+    if (passwordInput.type === "password") {
+      passwordInput.type = "text";
+      eyeIcon.classList.remove("fa-eye"); // Remove eye icon class
+      eyeIcon.classList.add("fa-eye-slash"); // Add eye-slash icon class
+    } else {
+      passwordInput.type = "password";
+      eyeIcon.classList.remove("fa-eye-slash"); // Remove eye-slash icon class
+      eyeIcon.classList.add("fa-eye"); // Add eye icon class
+    }
+  }
+</script>
 <%-include("Partials/footer")-%>

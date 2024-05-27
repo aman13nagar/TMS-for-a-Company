@@ -1,41 +1,163 @@
-<%-include("Partials/header")-%>
-<style>
-    body{
-      background:url('https://images.pexels.com/photos/956999/milky-way-starry-sky-night-sky-star-956999.jpeg?auto=compress&cs=tinysrgb&w=600');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Time Management System</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <style>
+    body {
+      background: #f0f2f5;
+      font-family: Arial, sans-serif;
+      padding:10px;
     }
-</style>
-<link rel="stylesheet" href="/style.css">
-<nav class="navbar navbar-expand-lg navbar-light bg-dark">
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo03" aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <a class="navbar-brand" href="/home-dashboard">TMS</a>
-    <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
-      <form class="form-inline my-2 my-lg-0" action="/home-dashboard" method="POST">
-        <div>
-          <a href="/Profile"><svg xmlns="http://www.w3.org/2000/svg" height="40" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 30 16">
-            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
-            <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
-          </svg></a>
-        </div>
-          <!-- <div class="post_btn"><a class="btn btn-dark btn-lg mr-sm-2" href="/Create-post" role="button">Create Post</a></div> -->
-        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Sign Out</button>
-      </form>
+    .navbar {
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .navbar-brand {
+      color: #fff !important;
+      font-size: 24px;
+    }
+    .navbar-toggler-icon {
+      color: #fff !important;
+    }
+    .form-inline .btn-outline-success {
+      color: #fff;
+      border-color: #28a745;
+    }
+    .form-inline .btn-outline-success:hover {
+      background-color: #28a745;
+      color: #fff;
+    }
+    .form-container {
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #fff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+    }
+    .form-container .box {
+      padding: 20px;
+    }
+    .form-container .box .form-label {
+      font-weight: bold;
+    }
+    .form-container .box .btn-primary {
+      width: 100%;
+      background: linear-gradient(90deg, #1d976c, #93f9b9);
+      border: none;
+      padding: 10px;
+      font-size: 16px;
+      transition: all 0.3s;
+    }
+    .form-container .box .btn-primary:hover {
+      background: linear-gradient(90deg, #93f9b9, #1d976c);
+      transform: scale(1.05);
+    }
+    .modal {
+      display: none; /* Ensure modal is hidden by default */
+      justify-content: center;
+      align-items: center;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.5);
+      animation: fadeIn 0.5s;
+    }
+    .modal.show {
+      display: flex; 
+    }
+    .modal-content, .modal-content1 {
+      background-color: #fefefe;
+      margin: auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+      max-width: 500px;
+      border-radius: 10px;
+      animation: slideIn 0.5s;
+    }
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideIn {
+      from { transform: translateY(-50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="form-container">
+  <form action="/find_slots" method="POST">
+    <div class="box">
+      <div class="mb-3">
+        <label for="inputAddress" class="form-label">Date and Time:</label>
+        <input type="datetime-local" id="meetingDateTime" class="form-control" name="time" required>
+      </div>
+      <div class="mb-3">
+        <label for="inputAddress" class="form-label">Duration (in Minutes):</label>
+        <input type="number" id="meetingDateTime" class="form-control" name="duration" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Find</button>
     </div>
-  </nav>
-  <div class="Form-container">
-    <form action="/find_slots" method="POST">
-        <div class="box" >
-            <div class="mb-3">
-              <label for="inputAddress" class="form-label">Date and Time:</label>
-              <input type="datetime-local" id="meetingDateTime" class="form-control" name="time" required>
-            </div>
-            <div class="mb-3">
-              <label for="inputAddress" class="form-label">Duration (in Minutes):</label>
-              <input type="number" id="meetingDateTime" class="form-control" name="duration" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Find</button>
-        </div>
-    </form>
-  </div>
- 
+  </form>
+</div>
+<div id="myModal" class="modal <%= messages.error || messages.success ? 'show' : '' %>">
+  <% if(messages.success){ %>
+    <div class="modal-content">
+      <span class="close" onclick="redirectToSchedule()">&times;</span>
+      <p><%= messages.success %></p>
+    </div>
+  <% } %>
+  <% if(messages.error){ %>
+    <div class="modal-content1">
+      <span class="close" onclick="redirectToverify()">&times;</span>
+      <p><%= messages.error %></p>
+    </div>
+  <% } %>
+</div>
+<script>
+  document.querySelectorAll('.close').forEach(closeButton => {
+    closeButton.addEventListener('click', () => {
+      document.getElementById('myModal').classList.remove('show');
+    });
+  });
+  if (document.getElementById('myModal').classList.contains('show')) {
+    setTimeout(() => {
+      document.getElementById('myModal').classList.remove('show');
+    }, 3000);
+  }
+
+  function redirectToSchedule() {
+    window.location.href = '/home-dashboard';
+  }
+
+  function redirectToverify() {
+    window.location.href = '/home-dashboard';
+  }
+</script>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>

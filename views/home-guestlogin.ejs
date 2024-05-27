@@ -1,20 +1,196 @@
 <%-include("Partials/header")-%>
 <style>
-  body{
-    background-image: url('https://images.pexels.com/photos/3801167/pexels-photo-3801167.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');
-    
+  * {
+    margin: 0px;
+    padding: 0px;
+  }
+  body {
+    background: #f2f2f2;
+    font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS",
+      sans-serif;
+  }
+  .usr {
+    display: flex;
+    flex-direction: row;
+    place-content: center;
+  }
+  .usr .signup {
+    display: flex;
+    flex-direction: column;
+    place-content: center;
+    background: #fff;
+    margin-top: 100px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+  }
+  .usr .signup .intr {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    flex-direction: column;
+    place-content: center;
+  }
+  .intr h1 {
+    font-weight: 300;
+    font-size: x-large;
+  }
+  .Form-container {
+    margin-bottom: 100px;
+    margin-left: 40px;
+    margin-right: 40px;
+    display: flex;
+  }
+  .forgot {
+    margin-bottom: 10px;
+  }
+  .vr {
+    margin-top: 10px;
+  }
+  .vr h1 {
+    font-size: 0.4cm;
+    color: black;
+  }
+  .vr h1 a {
+    color: black;
+  }
+  .Form-container .box {
+    color: black;
+    width: 300px;
+  }
+  .Form-container .box .form-check {
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+  @keyframes fly {
+    0% {
+      transform: translateY(0);
+    }
+    100% {
+      transform: translateY(5px);
+    }
+  }
+  .show {
+    display: flex;
+    flex-wrap: wrap;
+    place-content: center;
+    margin-left: 600px;
+    height: 150px;
+    width: 400px;
+    animation: fly 5s forwards;
+  }
+  .modal-content1 {
+    flex-direction: row;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 290px;
+    height: 50px;
+    background-color: rgb(253, 87, 87);
+  }
+  /* Close button */
+  .close {
+    color: black;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    margin-top: -10px;
+  }
+  .modal-content p {
+    margin-bottom: 1rem;
+    margin-left: 3px;
+    margin-top: -15px;
+    color: black;
+    font-size: small;
+    font-weight: bold;
+  }
+  .close:hover,
+  .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .intr .rr {
+    display: flex;
+    flex-direction: row;
+  }
+  .intr .rr1 {
+    margin-left: 40px;
+  }
+  .intr .rr h1 {
+    color: #ff6868;
+    font-weight: bold;
+    font-size: 1.3cm;
+  }
+  .intr .rr img {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+    margin-top: 13px;
   }
 </style>
-<nav class="navbar navbar-expand-lg navbar-light bg-dark">
-    <button class="navbar-toggler" type="button"  data-toggle="collapse" data-target="#navbarTogglerDemo03" aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <a class="navbar-brand" href="#">TMS</a>
-    <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
-      <form class="form-inline my-2 my-lg-0" action="/home-guestlogin" method="POST">
-        <input class="form-control mr-sm-2" type="text" placeholder="Username" name="username" autocomplete="off" required>
-        <input class="form-control mr-sm-2" type="password" placeholder="Password" name="password" autocomplete="off" required>
-        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Sign In</button>
+<div class="usr">
+  <section class="signup" id="sign">
+    <div class="intr">
+      <div class="rr">
+        <img src="https://cdn-icons-png.flaticon.com/512/4285/4285419.png" />
+        <h1>TMS</h1>
+      </div>
+      <div class="rr1">
+        <h1>Login</h1>
+      </div>
+    </div>
+    <div class="Form-container">
+      <form action="/home-guestlogin" method="POST">
+        <div class="box">
+          <div class="mb-3">
+            <input type="email" class="form-control" id="e1" placeholder="Email*" name="email" autocomplete="off" required/>
+          </div>
+          <div class="mb-3">
+            <input type="password" class="form-control" id="e2" placeholder="Password*" name="password" required/>
+          </div>
+          <div class="forgot">
+            <a
+              href="/forgot-password"
+              style="text-decoration: none; color: #888"
+              ><i class="fa-solid fa-lock"></i> Forgot Password?</a
+            >
+          </div>
+          <div class="sub">
+            <button
+              type="submit"
+              class="btn btn-primary"
+            >
+              Login <i class="fa-solid fa-arrow-right-to-bracket"></i>
+            </button>
+          </div>
+          <div class="vr">
+            <h1>Don't have an account? <a href="/home-guest"> Sign Up</a></h1>
+          </div>
+        </div>
       </form>
     </div>
-  </nav>
+  </section>
+</div>
+<div id="myModal" class="modal <%= messages.error ? 'show' : '' %>">
+  <% if (messages.error) { %>
+  <div class="modal-content1" id="m-c1">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <p><%= messages.error %></p>
+  </div>
+  <% } %>
+</div>
+
+<script>
+  // Close the modal when the close button is clicked or after 3 seconds
+  function closeModal() {
+    var modal = document.getElementById("myModal");
+    if (modal) {
+      modal.style.display = "none";
+    }
+  }
+
+  // Auto-close the modal after 3 seconds
+  if ('<%= messages.error ? true : false %>') {
+    setTimeout(closeModal, 3000);
+  }
+</script>

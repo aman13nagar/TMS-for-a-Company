@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projects</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .container {
+            width: 80%;
+            margin: 20px auto;
+        }
+
+        .project-card {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            padding: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .project-title {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .project-description {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .project-id {
+            font-size: 0.9rem;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="projects-container">
+        <!-- Projects will be dynamically loaded here -->
+    </div>
+    
+    <script>
+        const projects = [
+            ['Time Management Software (TMS) for a company', 1, 'A software solution to help manage and track employee time and productivity.'],
+            ['Hotel Automation Software', 2, 'Automate hotel operations including reservations, billing, and housekeeping.'],
+            ['Road Repair and Tracking System (RRTS)', 3, 'Monitor and manage road repair works and maintenance schedules.'],
+            ['Judiciary Information System (JIS)', 4, 'Streamline the management of judicial processes and case information.'],
+            ['Library Information System (LIS)', 5, 'Manage library resources, catalogues, and user checkouts efficiently.'],
+            ['Restaurant Automation System (RAS)', 6, 'Automate order taking, billing, and inventory management in restaurants.'],
+            ['Transport company computerization (TCC) software', 7, 'Improve logistics and operations for transport companies.'],
+            ['Simulation software', 8, 'Create realistic simulations for various training and educational purposes.'],
+            ['Software component cataloguing software', 9, 'Organize and manage software components and libraries.'],
+            ['Supermarket automation software (SAS)', 10, 'Automate supermarket operations including billing, inventory, and customer management.'],
+            ['Book-shop Automation Software (BAS)', 11, 'Manage book inventory, sales, and customer interactions.'],
+            ['Structured software analysis and design', 12, 'Tools for structured analysis and design of software projects.'],
+            ['Newspaper Agency Automation Software', 13, 'Manage subscriptions, billing, and distribution for newspaper agencies.'],
+            ['University Department Information System', 14, 'Organize and manage information within university departments.'],
+            ['Motor Part Shop Software (MPSS)', 15, 'Inventory and sales management for motor part shops.'],
+            ['Students’ Auditorium Management Software', 16, 'Schedule and manage events in student auditoriums.'],
+            ['Medicine Shop Automation (MSA)', 17, 'Automate sales, inventory, and customer management in pharmacies.']
+        ];
+
+        const container = document.getElementById('projects-container');
+
+        projects.forEach(project => {
+            const projectCard = document.createElement('div');
+            projectCard.className = 'project-card';
+
+            const projectTitle = document.createElement('h2');
+            projectTitle.className = 'project-title';
+            projectTitle.textContent = project[0];
+
+            const projectDescription = document.createElement('p');
+            projectDescription.className = 'project-description';
+            projectDescription.textContent = project[2];
+
+            const projectId = document.createElement('p');
+            projectId.className = 'project-id';
+            projectId.textContent = `Project ID: ${project[1]}`;
+
+            projectCard.appendChild(projectTitle);
+            projectCard.appendChild(projectDescription);
+            projectCard.appendChild(projectId);
+
+            container.appendChild(projectCard);
+        });
+    </script>
+</body>
+</html>

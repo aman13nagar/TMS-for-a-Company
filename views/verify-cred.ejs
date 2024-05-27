@@ -1,0 +1,231 @@
+<%-include("Partials/header")-%>
+<style>
+  .bb {
+    display: flex;
+    flex-wrap: wrap;
+    place-content: center;
+  }
+  .fp {
+    display: flex;
+    margin-top: 200px;
+    color: black;
+    margin-right: 100px;
+    background-color: #fdfbfb;
+  }
+  .message {
+    display: flex;
+    place-content: center;
+  }
+  .message-box {
+    color: black;
+  }
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0, 0, 0);
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+
+  .modal.show {
+    display: block;
+  }
+
+  .modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    text-align: center;
+  }
+
+  .modal-content .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
+
+  .modal-content .close:hover,
+  .modal-content .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .modal-content p {
+    font-size: 18px;
+    margin: 20px 0;
+  }
+
+  /* Optional styles for the success and error messages */
+  .modal-content p.success {
+    color: green;
+  }
+
+  .modal-content p.error {
+    color: red;
+  }
+  .close:hover,
+  .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .box1 {
+    display: flex;
+    flex-direction: column;
+    width: 400px;
+  }
+  .box1 .b1 {
+    font-size: small;
+    margin-bottom: 20px;
+  }
+  .box1 .b1 h1 {
+    font-size: medium;
+    font-weight: bold;
+  }
+  .box1 .b1 p span {
+    font-size: small;
+    font-weight: bold;
+  }
+  .box1 .btn {
+    width: 100px;
+  }
+  .fp img {
+    margin-right: 30px;
+  }
+</style>
+<div class="bb">
+  <div class="fp">
+    <img
+      src="https://t3.ftcdn.net/jpg/04/58/93/08/240_F_458930842_K4f5VCbR8c0oBCg7shRxcXDWzTtzJ9Ux.jpg"
+    />
+    <div style="display:flex;flex-direction: column;">
+      <form action="/verify-cred" id="verification-form" method="POST">
+        <div class="box1">
+          <div class="b1">
+            <h1>Let’s get your email verified</h1>
+            <p>
+              To keep your account secure we need to verify your email address.
+              Enter the code we have sent to <span><%=email%></span> below.
+            </p>
+            <a href="#">Need support?</a>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="inputEmail">Enter Code:</label>
+            <input
+              type="number"
+              id="verification-code"
+              class="form-control"
+              name="code"
+              autocomplete="off"
+              required
+            />
+          </div>
+          <input type="hidden" name="email" value="<%=email%>"/>
+          <button type="submit" id="verify-button" class="btn btn-primary">
+            Verify
+          </button>
+        </div>
+      </form>
+      <div>
+        <p id="timer">
+          This code will expire in <span id="countdown">60</span> seconds.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+<div
+  id="myModal"
+  class="modal <%= messages.error || messages.success ? 'show' : '' %>"
+>
+  <% if(messages.success) { %>
+  <div class="modal-content">
+    <span class="close" onclick="redirectToHome()">&times;</span>
+    <p class="success"><%= messages.success %></p>
+  </div>
+  <% } %> <% if(messages.error) { %>
+  <div class="modal-content">
+    <span class="close" onclick="redirectToguest()">&times;</span>
+    <p class="error"><%= messages.error %></p>
+  </div>
+  <% } %>
+</div>
+
+<script>
+  // Function to redirect to home
+  function redirectToHome() {
+    window.location.href = "/home-dashboard";
+  }
+
+  // Function to redirect to guest
+  function redirectToguest() {
+    window.location.href = "/home-guest";
+  }
+
+  // Function to close the modal
+  const closeModal = () => {
+    const modal = document.getElementById("myModal");
+    modal.style.display = "none";
+    if ("<%= messages.error %>") {
+      window.location.href = "/home-guest";
+    } else if ("<%= messages.success %>") {
+      window.location.href = "/home-dashboard";
+    }
+  };
+
+  // Close the modal when clicking outside of it
+  const modal = document.getElementById("myModal");
+  window.onclick = (event) => {
+    if (event.target == modal) {
+      closeModal();
+    }
+  };
+  if ("<%= messages.error %>") {
+    setTimeout(() => {
+      redirectToguest();
+    }, 3000);
+  }
+  setTimeout(closeModal, 60000);
+  let countdown = 60;
+  const countdownElement = document.getElementById("countdown");
+  const timer = setInterval(() => {
+    countdown--;
+    countdownElement.textContent = countdown;
+    if (countdown <= 0) {
+      clearInterval(timer);
+      deleteUser();
+    }
+  }, 1000);
+
+  // Function to delete user
+  function deleteUser() {
+    fetch("/delete-user", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ useremail: "<%= email %>" }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          redirectToguest();
+        } else {
+          console.error("Failed to delete user:", data.error);
+        }
+      })
+      .catch((error) => console.error("Error:", error));
+  }
+</script>

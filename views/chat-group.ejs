@@ -1,0 +1,352 @@
+<%-include("Partials/header")-%>
+<style>
+    *{
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    /* body::-webkit-scrollbar {
+      width: 10px;
+    }
+    body::-webkit-scrollbar-track {
+      background: #f5f5f5;
+    }
+    body::-webkit-scrollbar-thumb {
+      background: #888;
+    }
+    body:hover {
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
+    } */
+    #container1 {
+      margin-top:100px; 
+      background-color: #f0f0f0;
+      padding: 20px 0;
+      justify-content: space-around;
+      overflow-x: hidden;
+      display:flex;
+    }
+   .item {
+      text-align: center;
+      padding: 20px;
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      flex: 1;
+      margin: 0 10px;
+    }
+  
+    .item h1 {
+      color: #333333;
+      font-size: 24px;
+      font-weight: bold;
+    }
+  
+    .item ul {
+      list-style-type: none;
+      padding: 0;
+    }
+  
+    .item ul li {
+      color: #666666;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+    .cursor-pointer{
+      cursor: pointer;
+    }
+    #group-chat-container{
+      background-color: lightblue;
+      width:100%;
+      height:400px;
+      overflow:scroll;
+    }
+    .group-chat-section{
+      display:none;
+    }
+    .current-user-chat{
+      text-align: right;
+      margin: 0 20px;
+      color: black;
+      display: flex;
+      margin-top: 20px;
+      word-wrap: break-word;
+      flex-direction: column;
+      float: right;
+    }
+    .current-user-chat h5{
+      font-size:1.2em;
+      display:flex;
+      float:right;
+      margin-bottom: -20px;
+    }
+    .current-user-chat h5 span{
+      font-weight: 400;
+      display:flex;
+    }
+    .current-user-chat h5 span p{
+      width:400px;
+    }
+    .distance-user-chat{
+      text-align:left;
+      margin:10 20px;
+      color:black;
+      word-wrap:break-word;
+      flex-direction: column;
+      flex-flow:row
+    }
+    .distance-user-chat h5{
+      font-size:1.2em;
+      font-weight: 400;
+    }
+    .distance-user-chat .user-data{
+      display: flex;
+      margin-top:-15px
+    }
+    .distance-user-chat .user-data .user-info{
+      margin-top:-2px;
+      margin-left:10px;
+    }
+    .distance-user-chat h5 span{
+      margin-left:10px;
+      font-weight: 400;
+    }
+    .distance-user-chat h5 span p{
+      width:400px;
+    }
+    .modal-backdrop {
+      display:none;
+      opacity: 0.8;
+    }
+    .modal-backdrop.show {
+    
+      opacity: 0.8;
+    }
+    .row{
+      max-width:100vw;
+    }
+    .group {
+      margin-left: 100px;
+      height: 460px;
+      overflow: auto; 
+      border: 1px solid #ccc; 
+      border-radius: 8px; 
+    }
+    .group::-webkit-scrollbar {
+      width: 10px;
+    }
+    .group::-webkit-scrollbar-track {
+      background: #f5f5f5;
+    }
+    .group::-webkit-scrollbar-thumb {
+      background: #888;
+    }
+    .group:hover {
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Add shadow on hover for depth */
+    }
+    .group-item {
+      padding: 10px; 
+      border-bottom: 1px solid #ddd; 
+    }
+  
+    .group-item:last-child {
+      border-bottom: none; 
+    }
+    .group .list-group .c-user{
+      margin:2.5px 2px;
+    }
+    .group .list-group .c-user .group-list:hover {
+      background-color: rgb(139, 139, 139);
+    }
+    #group-chat-container {
+      background-color: #f5f5f5;
+      width: 100%;
+      height: 400px;
+      overflow: auto; /* Use 'auto' to show scrollbar only when necessary */
+      border-top-left-radius:10px;
+      border-bottom-left-radius: 10px;
+      padding: 10px; /* Add padding for spacing */
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add shadow for depth */
+    }
+    #group-chat-container::-webkit-scrollbar {
+      width: 10px;
+    }
+    #group-chat-container::-webkit-scrollbar-track {
+      background: #f5f5f5;
+    }
+    #group-chat-container::-webkit-scrollbar-thumb {
+      background: #888;
+    }
+    #group-chat-container:hover {
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Add shadow on hover for depth */
+    }
+    .group-start-head{
+      width:100%;
+      margin-left:50px;
+      background:#f5f5f5;
+      animation: fadeIn 0.5s ease-in-out;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .group-start-head:hover {
+      background-color: hsl(0, 0%, 94%);
+      cursor: pointer;
+    }
+    @keyframes fadeIn {
+      from {
+          opacity: 0;
+      }
+      to {
+          opacity: 1;
+      }
+    }
+    .group-intro-text {
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 10px;
+}
+
+.group-intro-text p {
+    font-size: 1.1em;
+    color: #555;
+}
+
+.group-intro-text ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.group-intro-text ul li {
+    margin: 5px 0;
+    padding-left: 20px;
+    position: relative;
+    font-size: 1em;
+    color: #333;
+}
+
+.group-intro-text ul li::before {
+    content: '•';
+    color: #007bff;
+    position: absolute;
+    left: 0;
+    font-size: 1.5em;
+    line-height: 1em;
+}
+
+  </style>
+<section id="team-collaboration"style="padding:50px 0;width:100vw">
+    <div class="row">
+      <div class="group">
+          <ul class="list-group">
+              <%if(myGroups.length>0){%>
+                      <%for(let i=0;i<myGroups.length;i++){%>
+                           <div class="c-user">
+                             <li class="list-group-item list-group-item-dark cursor-pointer group-list" data-id="<%=myGroups[i]['_id']%>">
+                                <svg xmlns="http://www.w3.org/2000/svg" height="40" fill="currentColor" class="bi bi-person-circle " viewBox="0 0 30 16" style="margin-right:-25px">
+                                  <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+                                  <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
+                                </svg>
+                              </li>
+                              <%=myGroups[i]['name']%>
+                            </div>
+                      <%}%>
+                <%}%>
+
+                <%if(joinedGroups.length>0){%>
+                    <%for(let i=0;i<joinedGroups.length;i++){%>
+                        <%if(joinedGroups[i]['group_id']!=null||joinedGroups[i]['group_id']['_id']!=null){%>
+                            <div class="c-user">
+                                <li class="list-group-item list-group-item-dark cursor-pointer group-list" data-id="<%=joinedGroups[i]['group_id']['_id']%>">
+                                   <svg xmlns="http://www.w3.org/2000/svg" height="40" fill="currentColor" class="bi bi-person-circle " viewBox="0 0 30 16" style="margin-right:-25px">
+                                     <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+                                     <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
+                                   </svg>
+                                 </li>
+                                 <%=joinedGroups[i]['group_id']['name']%>
+                            </div>
+                        <%}%>
+                    <%}%>
+              <%}%>
+          </ul>
+      </div>
+      <div class="" style="width:60%;display: flex;">
+          <div class="group-start-head">
+            <h5> <i class="fas fa-comments"></i>Click to start the Chat</h5>
+            <div class="group-intro-text">
+              <p>Welcome to the Group Chat! Here you can discuss topics with multiple colleagues at once. Here are some of the key features:</p>
+              <ul>
+                  <li>Group Messaging</li>
+                  <li>Real-Time Updates</li>
+                  <li>Collaborative Discussions</li>
+              </ul>
+              <p>Click on the chat icon above to start a conversation. Happy chatting!</p>
+            </div>
+          </div>
+          <div class="group-chat-section" style="margin-left:50px;width:100%">
+              <div id="group-chat-container" style="border:1px solid green;">
+              </div>
+              <form action="" id="group-chat-form" class="" style="margin-top:10px">
+                  <input type="text" name="message" placeholder="Enter Message" id="group-message" required autocomplete="off" style="height: 50px;border-radius:5px;width:50%">
+                  <button type="submit" class="btn btn-primary" style="margin-left:20%;margin-top:-10px">Send <i class="fa-solid fa-paper-plane"></i></button>
+              </form>
+          </div>
+      </div>
+    </div>      
+  </section>
+  <div class="modal fade" id="deleteGroupChatModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLongTitle">Delete Chat</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form action="" id="delete-group-chat-form">
+          <div class="modal-body">
+            <input type="hidden" name="id" id="delete-group-message-id">
+            <p>Are you sure you want to delte below message?</p>
+            <div style="word-wrap: break-word;"><p id="delete-group-message" style="width:-webkit-fill-available;font-weight: bold;"></p></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-danger">Delete</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="updateGroupChatModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLongTitle">Update Chat</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form action="" id="update-group-chat-form">
+          <div class="modal-body">
+            <input type="hidden" name="id" id="update-group-message-id">
+            <input type="text" name="message" id="update-group-message" required placeholder="Enter Message">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-warning">Update</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+<script src="/socket.io/socket.io.js"></script> 
+<script src="/js/main.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.js" integrity="sha512-+k1pnlgt4F1H8L7t3z95o3/KO+o78INEcXTbnoJQ/F2VqDVhWoaiVml/OEHv9HsVgxUaVW+IbiZPUJQfF/YxZw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  <%-include("Partials/header")-%>

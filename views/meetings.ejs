@@ -1,0 +1,156 @@
+<%-include('Partials/header')-%> <% if(meetings.length===0){%>
+<div id="noTasksModal" class="modal">
+  <div class="modal-content">
+    <!-- //<span class="close" onclick="closeModal()">&times;</span> -->
+    <h2>No Meetings Found</h2>
+    <p>
+      You have not scheduled any Meeting. Please schedule a meeting or go back!
+    </p>
+    <div style="display: flex; flex-direction: row;place-content: center;gap:40%">
+      <a href="/scheduleMeeting"><button class="btn btn-primary">Schedule</button></a>
+      <a href="/home-dashboard"><button class="btn btn-secondary">Go back</button></a>
+    </div>
+  </div>
+</div>
+<%}else{%>
+<div class="meetings-container">
+  <!-- Show latest meetings initially -->
+  <% let startIndex = Math.max(meetings.length - 10, 0); %> <% for(let i =
+  startIndex; i < meetings.length; i++) { %>
+  <div class="meeting-card">
+    <h2 class="meeting-title"><%= meetings[i].title %></h2>
+    <div class="meeting-details">
+      <p><strong>Start:</strong> <%= meetings[i].start.toLocaleString() %></p>
+      <p><strong>End:</strong> <%= meetings[i].end.toLocaleString() %></p>
+      <p><strong>Attendees:</strong> <%= meetings[i].attendees.join(', ') %></p>
+      <a
+        class="meeting-link"
+        href="/Meeting/showmeetings/<%= meetings[i].link %>"
+        >Join Meeting</a
+      >
+    </div>
+  </div>
+  <% } %>
+  <!-- Button to show previous meetings -->
+  <button id="showPreviousMeetings">Show Previous Meetings</button>
+  <!-- Hidden container for previous meetings -->
+  <div id="previousMeetingsContainer" style="display: none">
+    <% for(let i = 0; i < startIndex; i++) { %>
+    <div class="meeting-card">
+      <h2 class="meeting-title"><%= meetings[i].title %></h2>
+      <div class="meeting-details">
+        <p><strong>Start:</strong> <%= meetings[i].start.toLocaleString() %></p>
+        <p><strong>End:</strong> <%= meetings[i].end.toLocaleString() %></p>
+        <p>
+          <strong>Attendees:</strong> <%= meetings[i].attendees.join(', ') %>
+        </p>
+        <a
+          class="meeting-link"
+          href="/Meeting/showmeetings/<%= meetings[i].link %>"
+          >Join Meeting</a
+        >
+      </div>
+    </div>
+    <% } %>
+  </div>
+</div>
+<%}%>
+
+<script>
+  document
+    .getElementById("showPreviousMeetings")
+    .addEventListener("click", function () {
+      document.getElementById("previousMeetingsContainer").style.display =
+        "block";
+      this.style.display = "none";
+    });
+</script>
+<script>
+  if (document.getElementById("noTasksModal")) {
+    document.getElementById("noTasksModal").style.display = "block";
+  }
+  function closeModal() {
+    document.getElementById("noTasksModal").style.display = "none";
+  }
+</script>
+
+<style>
+  .meetings-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 3%;
+  }
+
+  .meeting-card {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+  }
+
+  .meeting-title {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+  }
+
+  .meeting-details {
+    font-size: 1rem;
+  }
+
+  .meeting-link {
+    display: inline-block;
+    margin-top: 10px;
+    color: #007bff;
+    text-decoration: none;
+  }
+
+  .meeting-link:hover {
+    text-decoration: underline;
+  }
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0, 0, 0);
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+
+  .modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+    text-align: center;
+    border-radius: 10px;
+  }
+  .modal-content h2 {
+    margin: 0 0 10px;
+  }
+  .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
+  .close:hover,
+  .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  }
+</style>
+
+<script>
+  // Helper function to format date
+  function formatDate(date) {
+    return new Date(date).toLocaleString();
+  }
+</script>

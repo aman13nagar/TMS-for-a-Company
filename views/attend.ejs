@@ -1,0 +1,43 @@
+<%-include('Partials/header')-%>
+<style>
+  body {
+    background-color: #f8f9fa;
+  }
+  .card {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  .card-title {
+    color: #007bff;
+  }
+  .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+  }
+  .btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+  }
+</style>
+<div class="container mt-5">
+  <div class="card">
+    <div class="card-body">
+      <h1 class="card-title text-center mb-4"><%= meeting.title %></h1>
+      <p>
+        <strong>Start:</strong> <%= new Date(meeting.start).toLocaleString() %>
+      </p>
+      <p><strong>End:</strong> <%= new Date(meeting.end).toLocaleString() %></p>
+      <p><strong>Attendees:</strong> <%= meeting.attendees.join(', ') %></p>
+      <div class="text-center mt-4">
+        <p class="lead"><strong>You can join the meeting here:</strong></p>
+        <a
+          href="<%= meeting.htmkLink%>"
+          class="btn btn-danger m-2"
+          target="_blank"
+          >Join via Google Meet</a
+        >
+      </div>
+    </div>
+  </div>
+</div>
+
+<%-include('Partials/footer')-%>

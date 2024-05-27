@@ -1,0 +1,186 @@
+<%-include('Partials/header')-%>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f2f5;
+    padding: 20px;
+  }
+
+  .employee-tasks {
+    list-style-type: none;
+    padding: 0;
+    max-width: 800px;
+    margin: auto;
+    display: flex;
+    flex-direction: column-reverse;
+  }
+
+  .employee-tasks li {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    padding: 20px;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  }
+
+  .employee-ttasksli:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .employee-tasks h3 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 10px;
+  }
+
+  .employee-tasks p {
+    font-size: 1rem;
+    color: #666;
+    margin: 5px 0;
+  }
+
+  .employee-tasks a {
+    display: inline-block;
+    margin-top: 10px;
+    color: #007bff;
+    text-decoration: none;
+    transition: color 0.3s ease-in-out;
+  }
+
+  .employee-tasks a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+  }
+
+  .employee-tasks form {
+    margin-top: 10px;
+  }
+
+  .employee-tasks button {
+    background-color: #28a745;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+  }
+
+  .employee-tasks button:hover {
+    background-color: #218838;
+  }
+  .pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+
+  .pagination a {
+    color: #007bff;
+    text-decoration: none;
+    margin: 0 5px;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    transition: background-color 0.3s ease-in-out;
+  }
+
+  .pagination a:hover {
+    background-color: #f0f2f5;
+  }
+
+  .pagination a.active {
+    background-color: #007bff;
+    color: #fff;
+    border: 1px solid #007bff;
+  }
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0, 0, 0);
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+
+  .modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+    text-align: center;
+    border-radius: 10px;
+  }
+  .modal-content h2 {
+    margin: 0 0 10px;
+  }
+  .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
+  .close:hover,
+  .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  }
+</style>
+<ul class="employee-tasks">
+  <% if(tasks.length===0){%>
+  <div id="noTasksModal" class="modal">
+    <div class="modal-content">
+      <!-- //<span class="close" onclick="closeModal()">&times;</span> -->
+      <h2>No Tasks Available</h2>
+      <p>
+        You currently have no tasks assigned. Please check back later !
+      </p>
+      <a href="/home-dashboard"><button class="btn btn-secondary">Go back</button></a>
+    </div>
+  </div>
+  <%}else{%> <% tasks.forEach(task => { %>
+  <li>
+    <h3><%= task.title %></h3>
+    <p><%= task.description %></p>
+    <p>Priority: <%= task.priority %></p>
+    <p>Due Date: <%= task.dueDate.toDateString() %></p>
+    <p>Status: <%= task.status %></p>
+    <a href="<%= task.calendarEvent.htmlLink %>">View on Calendar</a>
+    <% if (task.status !== 'completed') { %>
+    <form action="complete-task/<%= task._id %>" method="POST">
+      <button type="submit">Mark as Completed</button>
+    </form>
+    <% } %>
+  </li>
+  <% }) %> <%}%>
+</ul>
+<div class="pagination">
+  <% if (currentPage > 1) { %>
+  <a href="?page=<%= currentPage - 1 %>&limit=<%= limit %>">Previous</a>
+  <% } %> <% for (let i = 1; i <= totalPages; i++) { %>
+  <a
+    href="?page=<%= i %>&limit=<%= limit %>"
+    class="<%= i === currentPage ? 'active' : '' %>"
+    ><%= i %></a
+  >
+  <% } %> <% if (currentPage < totalPages) { %>
+  <a href="?page=<%= currentPage + 1 %>&limit=<%= limit %>">Next</a>
+  <% } %>
+</div>
+<script>
+  if (document.getElementById("noTasksModal")) {
+    document.getElementById("noTasksModal").style.display = "block";
+  }
+  function closeModal() {
+    document.getElementById("noTasksModal").style.display = "none";
+  }
+</script>

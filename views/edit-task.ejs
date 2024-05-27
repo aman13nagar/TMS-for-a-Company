@@ -1,0 +1,311 @@
+<%-include('Partials/header')-%>
+<style>
+  /* Reset some default styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+}
+
+.form-container {
+  max-width: 500px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.form-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.form-container label {
+  font-weight: bold;
+}
+
+.form-container input[type="text"],
+.form-container textarea,
+.form-container select {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.form-container select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='%23333333' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z'/%3E%3C/svg%3E");
+  background-position: right 10px center;
+  background-repeat: no-repeat;
+}
+
+.form-container input[type="date"] {
+  width: calc(100% - 22px);
+}
+
+.form-container textarea {
+  height: 100px;
+}
+
+.form-container button[type="submit"] {
+  width: 100%;
+  background-color: #4caf50;
+  color: white;
+  padding: 14px 20px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.form-container button[type="submit"]:hover {
+  background-color: #45a049;
+}
+.task-list {
+  list-style-type: none;
+  padding: 5% 10%;
+  margin: 20px 0;
+  display:flex;
+  flex-direction: column-reverse;
+}
+
+.task-list li {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.task-list h3 {
+  margin-bottom: 10px;
+}
+
+.task-list p {
+  margin-bottom: 5px;
+}
+
+.task-list form {
+  margin-top: 10px;
+}
+
+.task-list label {
+  font-weight: bold;
+}
+
+.task-list input[type="text"],
+.task-list textarea,
+.task-list select {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.task-list select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='%23333333' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z'/%3E%3C/svg%3E");
+  background-position: right 10px center;
+  background-repeat: no-repeat;
+}
+
+.task-list input[type="date"] {
+  width: calc(100% - 22px);
+}
+
+.task-list button[type="submit"] {
+  width: 100%;
+  background-color: #4caf50;
+  color: white;
+  padding: 14px 20px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+.task-list button[type="submit"]:hover {
+  background-color: #45a049;
+}
+#update-task:hover{
+  background-color:#45a049;;
+}
+.modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgb(0,0,0);
+      background-color: rgba(0,0,0,0.4);
+    }
+
+    .modal-content {
+      background-color: #fefefe;
+      margin: 15% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+      max-width: 500px;
+      text-align: center;
+      border-radius: 10px;
+    }
+
+    .modal-content h2 {
+      margin: 0 0 10px;
+    }
+
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
+</style>
+<ul class="task-list">
+  <% if (tasks.length === 0) { %>
+    <div id="noTasksModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2>No Tasks Available</h2>
+        <p>You currently have no tasks. Please check back later or create a new task.</p>
+        <a href="tasks"><button class="btn btn-secondary">Create Task</button></a>
+      </div>
+    </div>
+  <% } else { %>
+    <% tasks.forEach(task => { %>
+      <li>
+        <h3><%= task.title %></h3>
+        <p><%= task.description %></p>
+        <p>Priority: <%= task.priority %></p>
+        <p>Due Date: <%= task.dueDate.toDateString() %></p>
+        <p>Status: <%= task.status %></p>
+        <p>Assigned To: <%= task.assignedTo ? task.assignedTo.username : 'Unassigned' %></p>
+        <button class="update-task-btn" data-task-id="<%= task._id %>" style="width:30%;color: white;background-color:#4caf50;border: none;padding: 14px 20px;border-radius: 5px;margin: 10px 0;cursor: pointer;font-size: 16px;">Update Task</button>
+        <button class="delete-task-btn" data-task-id="<%= task._id %>" style="width:30%;color: white;background-color:#f44336;border: none;padding: 14px 20px;border-radius: 5px;margin: 10px 0;cursor: pointer;font-size: 16px;">Delete Task</button>
+        <form action="/manager/update-task" method="POST" id="update-task-form-<%= task._id %>" class="update-task-form" style="display: none;">
+          <input type="hidden" name="taskId" value="<%= task._id %>">
+          <div>
+            <label for="title-<%= task._id %>">Title</label>
+            <input type="text" id="title-<%= task._id %>" name="title" value="<%= task.title %>">
+          </div>
+          <div>
+            <label for="description-<%= task._id %>">Description</label>
+            <textarea id="description-<%= task._id %>" name="description"><%= task.description %></textarea>
+          </div>
+          <div>
+            <label for="priority-<%= task._id %>">Priority</label>
+            <select id="priority-<%= task._id %>" name="priority">
+              <option value="low" <%= task.priority === 'low' ? 'selected' : '' %>>Low</option>
+              <option value="medium" <%= task.priority === 'medium' ? 'selected' : '' %>>Medium</option>
+              <option value="high" <%= task.priority === 'high' ? 'selected' : '' %>>High</option>
+            </select>
+          </div>
+          <div>
+            <label for="dueDate-<%= task._id %>">Due Date</label>
+            <input type="date" id="dueDate-<%= task._id %>" name="dueDate" value="<%= task.dueDate.toISOString().split('T')[0] %>">
+          </div>
+          <div>
+            <label for="assignedTo-<%= task._id %>">Assign To</label>
+            <select id="assignedTo-<%= task._id %>" name="assignedTo">
+              <% employees.forEach(employee => { %>
+                <option value="<%= employee._id %>" <%= task.assignedTo && task.assignedTo._id.toString() === employee._id.toString() ? 'selected' : '' %>><%= employee.username %></option>
+              <% }) %>
+            </select>
+          </div>
+          <div>
+            <label for="status-<%= task._id %>">Status</label>
+            <select id="status-<%= task._id %>" name="status">
+              <option value="not started" <%= task.status === 'not started' ? 'selected' : '' %>>Not Started</option>
+              <option value="in progress" <%= task.status === 'in progress' ? 'selected' : '' %>>In Progress</option>
+              <option value="completed" <%= task.status === 'completed' ? 'selected' : '' %>>Completed</option>
+            </select>
+          </div>
+          <button type="button" class="btn btn-secondary close-form" data-task-id="<%= task._id %>">Close</button>
+          <button type="submit" class="btn btn-primary">Update Task</button>
+        </form>
+      </li>
+    <% }) %>
+  <% } %>
+</ul>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.update-task-btn').forEach(button => {
+      button.addEventListener('click', function() {
+        var taskId = this.getAttribute('data-task-id');
+        var form = document.getElementById('update-task-form-' + taskId);
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+      });
+    });
+
+    document.querySelectorAll('.close-form').forEach(button => {
+      button.addEventListener('click', function() {
+        var taskId = this.getAttribute('data-task-id');
+        var form = document.getElementById('update-task-form-' + taskId);
+        form.style.display = 'none';
+      });
+    });
+
+    document.querySelectorAll('.delete-task-btn').forEach(button => {
+      button.addEventListener('click', function() {
+        var taskId = this.getAttribute('data-task-id');
+        if (confirm('Are you sure you want to delete this task?')) {
+          fetch(`/manager/delete-task/${taskId}`, {
+            method: 'POST'
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              alert('Task deleted successfully');
+              location.reload(); // Reload the page to reflect the changes
+            } else {
+              alert('Error deleting task');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('Error deleting task');
+          });
+        }
+      });
+    });
+
+    // Show modal if no tasks
+    if (document.getElementById('noTasksModal')) {
+      document.getElementById('noTasksModal').style.display = 'block';
+    }
+  });
+
+  function closeModal() {
+    document.getElementById('noTasksModal').style.display = 'none';
+  }
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.js" integrity="sha512-+k1pnlgt4F1H8L7t3z95o3/KO+o78INEcXTbnoJQ/F2VqDVhWoaiVml/OEHv9HsVgxUaVW+IbiZPUJQfF/YxZw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  

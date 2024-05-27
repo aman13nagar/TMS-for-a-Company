@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leave Management System</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.9.0/main.min.css">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            animation: fadeIn 1s ease-in-out;
+        }
+        .modal-content {
+            border-radius: 10px;
+            border: none;
+            overflow: hidden;
+        }
+        .modal-header, .modal-footer {
+            border: none;
+            background: #007bff;
+            color: #fff;
+        }
+        .modal-header h5 {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+        .modal-footer button {
+            background-color: #0056b3;
+        }
+        .fc-toolbar-title {
+            font-size: 1.5rem;
+            color: #333;
+        }
+        .fc-button {
+            background-color: #007bff !important;
+            border: none !important;
+            color: white !important;
+            transition: background-color 0.3s ease;
+        }
+        .fc-button:hover {
+            background-color: #0056b3 !important;
+        }
+        
+        .fc-daygrid-event:hover {
+            transform: scale(1.05);
+        }
+        .fc-daygrid-block-event .fc-event-time, .fc-daygrid-block-event .fc-event-title {
+            white-space: normal !important;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        .modal-content {
+            border-radius: 10px;
+        }
+        .modal-header, .modal-footer {
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="calendar"></div>
+        <div style="display:flex">
+            <div style="height:20px;width:50px;background-color:green;margin-right:30%">Approved</div>
+            <div style="height:20px;width:50px;background-color:yellow;margin-right:30%">Pending</div>
+            <div style="height:20px;width:50px;background-color:red">Rejected</div>
+        </div>
+    </div>
+    <!-- Leave Request Modal -->
+    <div class="modal fade" id="leaveModal" tabindex="-1" aria-labelledby="leaveModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="leaveForm">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="leaveModalLabel">Request Leave</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="leaveStart" class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="leaveStart" name="start" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="leaveEnd" class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="leaveEnd" name="end" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="leaveReason" class="form-label">Reason</label>
+                            <textarea class="form-control" id="leaveReason" name="reason" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Request Leave</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.9.0/main.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const calendarEl = document.getElementById('calendar');
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                dateClick: function(info) {
+                    const leaveModal = new bootstrap.Modal(document.getElementById('leaveModal'));
+                    document.getElementById('leaveStart').value = info.dateStr+'T09:00';
+                    leaveModal.show();
+                },
+                events: async function(fetchInfo, successCallback, failureCallback) {
+                    try {
+                        const response = await fetch('Leave/leave-requests');
+                        const data = await response.json();
+                        const events = data.map(leave => ({
+                            title: `Leave: ${leave.reason}`,
+                            start: leave.start,
+                            end: leave.end,
+                            backgroundColor: leave.status === 'approved' ? 'green' : leave.status === 'rejected' ? 'red' : 'yellow',
+                            borderColor: leave.status === 'approved' ? 'green' : leave.status === 'rejected' ? 'red' : 'yellow',
+                            textColor: 'white'
+                        }));
+                        successCallback(events);
+                    } catch (error) {
+                        console.error('Error fetching leave requests', error);
+                        failureCallback(error);
+                    }
+                }
+            });
+            calendar.render();
+
+            document.getElementById('leaveForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const leaveData = {};
+                formData.forEach((value, key) => {
+                    leaveData[key] = value;
+                });
+
+                try {
+                    const response = await fetch('Leave/request-leave', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(leaveData)
+                    });
+                    const result = await response.text();
+                    alert(result);
+                    calendar.refetchEvents();
+                    location.reload();
+                    const leaveModal = bootstrap.Modal.getInstance(document.getElementById('leaveModal'));
+                    leaveModal.hide();
+                } catch (error) {
+                    console.log('Error:', error);
+                }
+            });
+        });
+    </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+<script src="/socket.io/socket.io.js"></script> 
+<script src="/js/main.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.js" integrity="sha512-+k1pnlgt4F1H8L7t3z95o3/KO+o78INEcXTbnoJQ/F2VqDVhWoaiVml/OEHv9HsVgxUaVW+IbiZPUJQfF/YxZw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+</html>

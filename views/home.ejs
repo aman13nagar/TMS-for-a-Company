@@ -1,0 +1,812 @@
+<%-include("Partials/header")-%>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+<link rel="stylesheet" href="/css/home.css">
+<link rel="stylesheet" href="/css/features.css">
+<link rel="stylesheet" href="/css/pricing.css">
+<link rel="stylesheet" href="/css/contact.css">
+<style>
+    .circle {
+        margin-top: 60px;
+        margin-left: 20px;
+       /* margin-left: -100px; */
+        transform: translate(-50%, -50%);
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        background-color: rgb(23, 201, 241);
+    }
+    .circle1 {
+        position: absolute;
+        /* top: 20%; */
+        left: 80%;
+        top: 80%;
+        transform: translate(-50%, -50%);
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        background-color: rgb(244, 255, 44);
+    }
+    .half-circle {
+        width: 100%; 
+        height: 700px; 
+        position:relative;
+        overflow: hidden;
+        /* background-color: #2b2c42;
+        border-radius: 0 0 100px 100px; Border-radius to create half-circle */
+    }
+    .half-circle::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 2%;
+        width: 330%;
+        height: 100%;
+        background-color: #2b2c42; 
+        border-radius: 50%; 
+        transform: translateX(-70%);
+    }
+    .half-circle1 {
+        width: 100%;
+        height: 700px; 
+        position:relative;
+        overflow: hidden;
+        /* background-color: #2b2c42;
+        border-radius: 0 0 100px 100px; Border-radius to create half-circle */
+    }
+    .half-circle1::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 2%;
+        width: 330%;
+        height: 100%;
+        background-color: #2b2c42;
+        border-radius: 50%;
+        transform: translateX(70%);
+    }
+    /* #searchForm .btn-link {
+    padding: 0;
+    margin-left: -40px;
+    border: none;
+    cursor: pointer;
+}
+
+#searchForm .btn-link .fa-search {
+    font-size: 1.5em;
+    color: #28a745; 
+}
+
+.highlight {
+    background-color: rgb(30, 255, 0);
+}
+.collapse{
+    margin-right:20px;
+}
+.collapse .navbar-nav{
+    margin-left:20%;
+}
+.collapse .mx-auto{
+    width:45vw;
+}
+.collapse.show {
+    display:block;
+    margin-right:0;
+    background-color: aliceblue;
+}
+.collapse.show ul{
+    margin-left: 15%;
+    display: flex;
+    flex-direction: row;
+}
+.collapse.show .mx-auto{
+    width:90vw;
+} */
+header {
+      position: fixed;
+      z-index: 1000;
+      width: 100%;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      background-color: #fff;
+    }
+    .navbar {
+      height: 80px;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .navbar-light .navbar-brand {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #ef3535;
+    }
+    .navbar-nav {
+      display: flex;
+      align-items: center;
+    }
+    .nav-link {
+      font-size: 1.1rem;
+      margin: 0 10px;
+    }
+    .form-inline {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      max-width: 500px;
+      margin-right: 20px;
+    }
+    .form-control {
+      border-radius: 25px 0 0 25px;
+      border-right: none;
+      flex: 1;
+      outline:none;
+    }
+    .form-control:focus {
+      outline: none;
+      box-shadow: none;
+    }
+    .btn-link {
+      border-radius: 0 25px 25px 0;
+      border-left: none;
+      background-color: #000;
+      height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-link i {
+      color: #fff;
+    }
+    .btn-secondary {
+      background: linear-gradient(90deg, #000000, #434343);
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 25px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    @media (max-width: 767.98px) {
+      .navbar-nav {
+        flex-direction: column;
+        text-align: center;
+        transition: all 0.3s ease;
+      }
+      .navbar-nav .nav-item {
+        margin-bottom: 10px;
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      .navbar-nav.show .nav-item {
+        opacity: 1;
+        transform: translateY(0);
+        transition: opacity 0.5s, transform 0.5s;
+      }
+      .navbar-toggler {
+        margin-right: 10px;
+      }
+      .form-inline {
+        margin: 10px 0;
+      }
+    }
+    .collapse.show {
+    /* display: block; */
+       display: flex;
+    }
+    .collapse.show ul li{
+        margin-top:10px;
+    }
+    .collapse.show ul li .nav-item{
+        color:white;
+    }
+    .collapse.show form .btn{
+        padding:25px;
+    }
+    
+</style>
+<script>
+    function smoothScroll(target, duration) {
+        var targetSection = document.querySelector(target);
+        var targetPosition = targetSection.getBoundingClientRect().top;
+        var startPosition = window.pageYOffset;
+        var distance = targetPosition - startPosition;
+        var startTime = null;
+        function animation(currentTime) {
+            if (startTime === null) startTime = currentTime;
+            var timeElapsed = currentTime - startTime;
+            var ease = function(t, b, c, d) {
+                t /= d / 2;
+                if (t < 1) return c / 2 * t * t + b;
+                t--;
+                return -c / 2 * (t * (t - 2) - 1) + b;
+            };
+            var run = ease(timeElapsed, startPosition, distance, duration);
+            window.scrollTo(0, run);
+            if (timeElapsed < duration) requestAnimationFrame(animation);
+        }
+        requestAnimationFrame(animation);
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        var featuresLink = document.querySelector('a[href="#features"]');
+        featuresLink.addEventListener('click', function(event) {
+            event.preventDefault();
+            smoothScroll('#features', 100);
+        });
+        var featuresLink = document.querySelector('a[href="#pricing"]');
+        featuresLink.addEventListener('click', function(event) {
+            event.preventDefault();
+            smoothScroll('#pricing', 100); 
+        });
+        var featuresLink = document.querySelector('a[href="#contact"]');
+        featuresLink.addEventListener('click', function(event) {
+            event.preventDefault();
+            smoothScroll('#contact', 100); 
+        });
+    });
+
+    function redirectTohome() {
+        window.location.href = '/';
+    }
+    function toggleFeatures() {
+        var dropdown = document.getElementById("featuresDropdown");
+        if (dropdown.style.display === "block") {
+            dropdown.style.display = "none";
+        } else {
+            dropdown.style.display = "block";
+        }
+    }
+</script>
+<header>
+    <nav class="navbar navbar-expand-lg navbar-light">
+      <a class="navbar-brand" href="#">TMS</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo03" aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
+        <ul class="navbar-nav mr-auto mt-2 mt-lg-0" style="margin-left:10%">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="#">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#features">Features</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#pricing">Pricing</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#contact">Contact</a>
+          </li>
+        </ul>
+        <form class="form-inline my-2 my-lg-0" id="searchForm" onsubmit="return false;">
+          <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" id="searchInput" style="padding:25px;background-color: #ededed;">
+          <button class="btn btn-link" type="button" onclick="searchContent()" style="margin-top:0;margin-left:-50px;background-color:#0303ef;padding:25px">
+            <i class="fa fa-search" aria-hidden="true"></i>
+          </button>
+        </form>
+        <a href="home-guestlogin" class="ml-3" style="margin-top:-20px">
+          <button class="btn btn-secondary">
+            Login
+          </button>
+        </a>
+      </div>
+    </nav>
+  </header>
+  <script>
+    $(document).ready(function() {
+      $('.navbar-toggler').click(function() {
+        $('.navbar-nav').toggleClass('show');
+      });
+    });
+  </script>
+<section id="hero">
+    <div class="hero-content">
+        <div class="im">
+            <div class="transition-circle"></div>
+            <div class="hr">
+                <h2>Welcome to our Time Management Software</h2>
+                <p>Efficiently manage your time and increase productivity</p>
+                <a href="home-guest" class="btn">Sign Up <i class="fa-solid fa-arrow-right-to-bracket"></i></a>
+            </div>
+        </div>
+        <div class="extra-content-wrapper">
+            <div class="extra-content">
+                <h3>Why Choose Us?</h3>
+                <ul>
+                    <li>Track your time effortlessly</li>
+                    <li>Increase productivity with insightful analytics</li>
+                    <li>Customizable alerts and notifications</li>
+                    <li>Seamless integration with your favorite tools</li>
+                </ul>
+            </div>
+            <div class="slider">
+                <div class="slides">
+                    <img src="/uploads/TMS1.png" alt="Slide 3">
+                    <img src="/uploads/TMS2.png" alt="Slide 4">
+                    <img src="/uploads/TMS3.png" alt="Slide 5">
+                    <img src="/uploads/TMS4.png" alt="Slide 6" style="margin-left:18px">
+                    <img src="/uploads/AdobeStock_226771742_Preview.jpeg" alt="Slide 1">
+                    <img src="/uploads/AdobeStock_404410054_Preview.jpeg" alt="Slide 2">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const slides = document.querySelector('.slides');
+        const images = slides.querySelectorAll('img');
+        let currentIndex = 0;
+        
+        function showNextSlide() {
+            currentIndex = (currentIndex + 1) % images.length;
+            slides.style.transform = `translateX(-${currentIndex * 300}px)`;
+        }
+        setInterval(showNextSlide, 3000);
+    });
+</script>
+
+
+<section id="features">
+    <div style="background-color: #2e2f46;width:150px;height:700px">
+        <div class="half-circle"></div>
+    </div>
+    <div id="carouselExampleSlidesOnly" class="carousel slide" data-bs-ride="carousel" style="max-width:85vw;background-color: #2b2c42;" >
+        <div class="carousel-inner" style="margin-top:50px;background-color: #2b2c42;">
+          <div class="carousel-item active a1" style="width:85vw">
+            <div class="a11" style="display:flex">
+                <div class="item1">
+                    <h3>Task Management</h3>
+                    <p>Easily organize and prioritize tasks.</p>
+                    <div class="task" style="display:flex;flex-direction:column">
+                        <div class="task1" style="display:flex;flex-direction:row;margin-top:10px;margin-bottom:10px">
+                            <i class="fa-solid fa-arrow-right" style="margin-top:2.5px;margin-right:5px"></i>
+                            <h1>Task Creation <i class="fa-solid fa-circle-chevron-down"></i></h1>
+                        </div>
+                        <div class="task2" style="display:flex;flex-direction:row;margin-top:10px;margin-bottom:10px">
+                            <i class="fa-solid fa-arrow-right" style="margin-top:2.5px;margin-right:5px"></i>
+                            <h1>Task Organization <i class="fa-solid fa-circle-chevron-down"></i></h1>
+                        </div>
+                        <div class="task3" style="display:flex;flex-direction:row;margin-top:10px;margin-bottom:10px">
+                            <i class="fa-solid fa-arrow-right" style="margin-top:2.5px;margin-right:5px"></i>
+                            <h1>Task Assignment <i class="fa-solid fa-circle-chevron-down"></i></h1>
+                        </div>
+                        <div class="task4" style="display:flex;flex-direction:row;margin-top:10px;margin-bottom:10px">
+                            <i class="fa-solid fa-arrow-right" style="margin-top:2.5px;margin-right:5px"></i>
+                            <h1>Task Prioritization <i class="fa-solid fa-circle-chevron-down"></i></h1>
+                        </div>
+                        <div class="task5" style="display:flex;flex-direction:row;margin-top:10px;margin-bottom:10px">
+                            <i class="fa-solid fa-arrow-right" style="margin-top:2.5px;margin-right:5px"></i>
+                            <h1>Task History <i class="fa-solid fa-circle-chevron-down"></i></h1>
+                        </div>
+                        <div class="task6" style="display:flex;flex-direction:row;margin-top:10px;margin-bottom:10px">
+                            <i class="fa-solid fa-arrow-right" style="margin-top:2.5px;margin-right:5px"></i>
+                            <h1>Integration with Calendar and Email <i class="fa-solid fa-circle-chevron-down"></i></h1>
+                        </div>
+                    </div>
+                </div>
+                <div class="img1">
+                    <div class="rotating-circle">
+                        <div class="small-image" data-image="1"></div>
+                    </div>
+                    <img src="https://st.depositphotos.com/33945136/56916/v/450/depositphotos_569160910-stock-illustration-vector-illustration-businessman-calendar-planning.jpg" alt="Task Management">
+                </div>
+            </div> 
+          </div>
+          <div class="carousel-item a2" style="width:85vw;">
+            <div class="a21" style="display:flex">
+                <div class="item2">
+                    <h3>Time Tracking</h3>
+                    <p>Track time spent on tasks and projects.</p>
+                    <div class="task" style="display:flex;flex-direction:column">
+                        <div class="task1" style="display:flex;flex-direction:row;margin-top:10px;margin-bottom:10px">
+                            <i class="fa-solid fa-arrow-right" style="margin-top:2.5px;margin-right:5px"></i>
+                            <h1>Time Logging <i class="fa-solid fa-circle-chevron-down"></i></h1>
+                        </div>
+                        <div class="task2" style="display:flex;flex-direction:row;margin-top:10px;margin-bottom:10px">
+                            <i class="fa-solid fa-arrow-right" style="margin-top:2.5px;margin-right:5px"></i>
+                            <h1>Timer Functionality <i class="fa-solid fa-circle-chevron-down"></i></h1>
+                        </div>
+                        <div class="task3" style="display:flex;flex-direction:row;margin-top:10px;margin-bottom:10px">
+                            <i class="fa-solid fa-arrow-right" style="margin-top:2.5px;margin-right:5px"></i>
+                            <h1>Project-Based Tracking <i class="fa-solid fa-circle-chevron-down"></i></h1>
+                        </div>
+                        <div class="task4" style="display:flex;flex-direction:row;margin-top:10px;margin-bottom:10px">
+                            <i class="fa-solid fa-arrow-right" style="margin-top:2.5px;margin-right:5px"></i>
+                            <h1>Reporting and Analytics <i class="fa-solid fa-circle-chevron-down"></i></h1>
+                        </div>
+                        <div class="task5" style="display:flex;flex-direction:row;margin-top:10px;margin-bottom:10px">
+                            <i class="fa-solid fa-arrow-right" style="margin-top:2.5px;margin-right:5px"></i>
+                            <h1>Integration with Other Tools <i class="fa-solid fa-circle-chevron-down"></i></h1>
+                        </div>
+                        <div class="task6" style="display:flex;flex-direction:row;margin-top:10px;margin-bottom:10px">
+                            <i class="fa-solid fa-arrow-right" style="margin-top:2.5px;margin-right:5px"></i>
+                            <h1>Automatic Time Tracking <i class="fa-solid fa-circle-chevron-down"></i></h1>
+                        </div>
+                    </div>
+                </div>
+                <div class="img2">
+                    <img src="https://www.softactivity.com/wp-content/uploads/Employee-Time-Tracking-1400.jpg" alt="Time Tracking">
+                    <div class="circle"></div>
+                    <div class="circle1"></div>
+                </div>
+            </div>
+          </div>
+          <div class="carousel-item a3" style="width:85vw;">
+            <div class="a31" style="display:flex">
+                <div class="item3">
+                    <h3>Reporting</h3>
+                    <p>Generate reports to analyze productivity.</p>
+                    <div class="task" style="display:flex;flex-direction:column">
+                        <div class="task1" style="display:flex;flex-direction:row;margin-top:10px;margin-bottom:10px">
+                            <i class="fa-solid fa-arrow-right" style="margin-top:2.5px;margin-right:5px"></i>
+                            <h1>Customizable Reports <i class="fa-solid fa-circle-chevron-down"></i></h1>
+                        </div>
+                        <div class="task2" style="display:flex;flex-direction:row;margin-top:10px;margin-bottom:10px">
+                            <i class="fa-solid fa-arrow-right" style="margin-top:2.5px;margin-right:5px"></i>
+                            <h1>Data Aggregation <i class="fa-solid fa-circle-chevron-down"></i></h1>
+                        </div>
+                        <div class="task3" style="display:flex;flex-direction:row;margin-top:10px;margin-bottom:10px">
+                            <i class="fa-solid fa-arrow-right" style="margin-top:2.5px;margin-right:5px"></i>
+                            <h1>Drill-down Capabilities <i class="fa-solid fa-circle-chevron-down"></i></h1>
+                        </div>
+                        <div class="task4" style="display:flex;flex-direction:row;margin-top:10px;margin-bottom:10px">
+                            <i class="fa-solid fa-arrow-right" style="margin-top:2.5px;margin-right:5px"></i>
+                            <h1>Scheduled Reports <i class="fa-solid fa-circle-chevron-down"></i></h1>
+                        </div>
+                        <div class="task5" style="display:flex;flex-direction:row;margin-top:10px;margin-bottom:10px">
+                            <i class="fa-solid fa-arrow-right" style="margin-top:2.5px;margin-right:5px"></i>
+                            <h1>Comparative Analysis <i class="fa-solid fa-circle-chevron-down"></i></h1>
+                        </div>
+                        <div class="task6" style="display:flex;flex-direction:row;margin-top:10px;margin-bottom:10px">
+                            <i class="fa-solid fa-arrow-right" style="margin-top:2.5px;margin-right:5px"></i>
+                            <h1>Data Security and Privacy <i class="fa-solid fa-circle-chevron-down"></i></h1>
+                        </div>
+                    </div>
+                </div>
+                <div class="img3">
+                    <img src="https://st4.depositphotos.com/33945136/41464/v/450/depositphotos_414645226-stock-illustration-design-reporting-vector-editable-flat.jpg" alt="Reporting">
+                    <div class="report"style="display:flex">
+                        <div style="width:20px;height: 250px;background-color: red;margin-right: 10px;"></div>
+                        <div style="width:20px;height: 200px;margin-right: 10px;margin-top: 50px;background-color: red;"></div>
+                        <div style="width:20px;height: 150px;margin-top: 100px;margin-right: 10px;background-color: red;"></div>
+                        <div style="width:20px;height:100px;margin-top: 150px;background-color: red;"></div>
+                        <div class="subreport"style="margin-top: 50px;width:200px;border-radius: 10px;height:200px;margin-left: 50px;margin-right: 10px;background-color: #94fbf4;display:flex;">
+                            <div class="rp1"style="display:flex;flex-direction: column;margin-right: 20px;margin-top: 50px;">
+                                <div style="height:20px;width:20px;margin-left: 25px;background-color: #ef3535;border-radius: 50%;"></div>
+                                <div style="height: 50px;width: 50px;margin-left: 10px;border-top-left-radius: 100%;border-top-right-radius: 100%;background-color:#ef3535"></div>
+                            </div>
+                            <div class="rp2"style="display:flex;flex-direction: column;margin-top: 55px;">
+                                <div style="width:100px;height:10px;background-color:beige;margin-bottom:5px"></div>
+                                <div style="width:100px;height:10px;background-color:beige;margin-bottom:5px"></div>
+                                <div style="width:100px;height:10px;background-color:beige;margin-bottom:5px"></div>
+                                <div style="width:100px;height:10px;background-color:beige;margin-bottom:5px"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+          </div>
+          <div class="carousel-item a4" style="width:85vw;">
+            <div class="a41" style="display:flex">
+                <div class="item4">
+                    <h3>Team Collaboration</h3>
+                    <p>Work together efficiently.</p>
+                    <div class="task" style="display:flex;flex-direction:column">
+                        <div class="task1" style="display:flex;flex-direction:row;margin-top:10px;margin-bottom:10px">
+                            <i class="fa-solid fa-arrow-right" style="margin-top:2.5px;margin-right:5px"></i>
+                            <h1>Real-time Messaging <i class="fa-solid fa-circle-chevron-down"></i></h1>
+                        </div>
+                        <div class="task2" style="display:flex;flex-direction:row;margin-top:10px;margin-bottom:10px">
+                            <i class="fa-solid fa-arrow-right" style="margin-top:2.5px;margin-right:5px"></i>
+                            <h1>Team Channels or Groups <i class="fa-solid fa-circle-chevron-down"></i></h1>
+                        </div>
+                        <div class="task3" style="display:flex;flex-direction:row;margin-top:10px;margin-bottom:10px">
+                            <i class="fa-solid fa-arrow-right" style="margin-top:2.5px;margin-right:5px"></i>
+                            <h1>File Sharing and Document Collaboration <i class="fa-solid fa-circle-chevron-down"></i></h1>
+                        </div>
+                        <div class="task4" style="display:flex;flex-direction:row;margin-top:10px;margin-bottom:10px">
+                            <i class="fa-solid fa-arrow-right" style="margin-top:2.5px;margin-right:5px"></i>
+                            <h1>Project Collaboration Spaces <i class="fa-solid fa-circle-chevron-down"></i></h1>
+                        </div>
+                        <div class="task5" style="display:flex;flex-direction:row;margin-top:10px;margin-bottom:10px">
+                            <i class="fa-solid fa-arrow-right" style="margin-top:2.5px;margin-right:5px"></i>
+                            <h1>Activity Feeds and Notifications <i class="fa-solid fa-circle-chevron-down"></i></h1>
+                        </div>
+                        <div class="task6" style="display:flex;flex-direction:row;margin-top:10px;margin-bottom:10px">
+                            <i class="fa-solid fa-arrow-right" style="margin-top:2.5px;margin-right:5px"></i>
+                            <h1>Polls and Surveys <i class="fa-solid fa-circle-chevron-down"></i></h1>
+                        </div>
+                    </div>
+                </div>
+                <div class="img4">
+                    <img src="https://img.freepik.com/free-vector/business-team-brainstorm-idea-lightbulb-from-jigsaw-working-team-collaboration-enterprise-cooperation-colleagues-mutual-assistance-concept-pinkish-coral-bluevector-isolated-illustration_335657-1651.jpg?size=626&ext=jpg" alt="Team Collaboration">
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    <div style="height:700px;width:150px;background-color:#2e2f46">
+        <div class="half-circle1"></div>
+    </div>
+    <!-- <div style="height:50px;width:100%;background-color:#000336;position:absolute;margin-top:700px"></div> -->
+</section>
+<section id="pricing">
+    <div class="container">
+        <h2>Pricing</h2>
+        <p>Choose a plan that fits your needs.</p>
+        <div class="pricing-plans">
+            <div class="pricing-plan">
+                <h3>Basic</h3>
+                <p>Perfect for individuals or small teams</p>
+                <p>Free</p>
+                <div class="dropdown">
+                    <button onclick="toggleFeatures(this)" class="dropbtn">Features <i class="fa-solid fa-circle-chevron-down"></i></button>
+                    <div class="dropdown-content">
+                        <a href="#">Task Management</a>
+                        <a href="#">Time Tracking</a>
+                        <a href="#">Collaboration Tools</a>
+                        <a href="#">Project Management</a>
+                        <a href="#">Reporting</a>
+                        <a href="#">Support</a>
+                    </div>
+                </div>
+                <a href="home-guest" class="btn">Sign Up</a>
+            </div>
+            <div class="pricing-plan">
+                <h3>Pro</h3>
+                <p>Great for medium to large teams (Best Plan)</p>
+                <p>$9/month</p>
+                <div class="dropdown">
+                    <button onclick="toggleFeatures(this)" class="dropbtn">Features <i class="fa-solid fa-circle-chevron-down"></i></button>
+                    <div class="dropdown-content">
+                        <a href="#">All Basic features</a>
+                        <a href="#">Advanced Task Management</a>
+                        <a href="#">Advanced Time Tracking</a>
+                        <a href="#">Team Collaboration</a>
+                        <a href="#">Project Portfolio Management</a>
+                        <a href="#">Customization</a>
+                        <a href="#">Integrations</a>
+                        <a href="#">Advanced Reporting</a>
+                        <a href="#">Priority Support</a>
+                        <a href="#">Security and Compliance</a>
+                    </div>
+                </div>
+                <a href="home-guest" class="btn">Sign Up</a>
+            </div>
+            <div class="pricing-plan">
+                <h3>Enterprise</h3>
+                <p>Customized solutions for enterprise-level needs</p>
+                <p>Contact us for pricing</p>
+                <div class="dropdown">
+                    <button onclick="toggleFeatures(this)" class="dropbtn">Features <i class="fa-solid fa-circle-chevron-down"></i></button>
+                    <div class="dropdown-content">
+                        <a href="#">Customizable Workflows</a>
+                        <a href="#">Enterprise-Grade Security</a>
+                        <a href="#">Scalability</a>
+                        <a href="#">Dedicated Support</a>
+                        <a href="#">Single Sign-On (SSO) Integration</a>
+                        <a href="#">Custom Branding</a>
+                        <a href="#">Advanced Analytics</a>
+                        <a href="#">Compliance and Audit Trails</a>
+                        <a href="#">API Access and Integrations</a>
+                        <a href="#">Data Governance</a>
+                        <a href="#">High Availability and Disaster Recovery</a>
+                    </div>
+                </div>
+                <a href="#contact" class="btn">Contact Us</a>
+            </div>
+        </div>
+        <div class="testimonials">
+            <h3>What Our Customers Say</h3>
+            <div class="testimonial">
+                <p>"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."</p>
+                <span>- John Doe, CEO at Company X</span>
+            </div>
+            <div class="testimonial">
+                <p>"Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."</p>
+                <span>- Jane Smith, Founder at Company Y</span>
+            </div>
+        </div>
+        <div class="faq">
+            <h3>Frequently Asked Questions</h3>
+            <div class="faq-item">
+                <div class="question">
+                    <h4>Can I upgrade or downgrade my plan?</h4>
+                    <button class="toggle-btn">+</button>
+                </div>
+                <div class="answer">
+                    <p>Yes, you can upgrade or downgrade your plan at any time. Changes will take effect immediately.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="question">
+                    <h4>Is there a money-back guarantee?</h4>
+                    <button class="toggle-btn">+</button>
+                </div>
+                <div class="answer">
+                    <p>Yes, you can cancel your subscription within 30 days for a full refund.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="question">
+                    <h4>How do I cancel my subscription?</h4>
+                    <button class="toggle-btn">+</button>
+                </div>
+                <div class="answer">
+                    <p>You can cancel your subscription from your account settings or by contacting our support team.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="question">
+                    <h4>Is there a free trial available?</h4>
+                    <button class="toggle-btn">+</button>
+                </div>
+                <div class="answer">
+                    <p>Yes, we offer a 14-day free trial for our Pro plan.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="question">
+                    <h4>What payment methods do you accept?</h4>
+                    <button class="toggle-btn">+</button>
+                </div>
+                <div class="answer">
+                    <p>We accept major credit cards and PayPal.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section id="contact">
+    <h2 style="margin-left:20px">Contact Us <i class="fa-regular fa-address-card"></i></h2>
+    <div class="contact-info">
+        <div class="contact-details">
+            <h3>Contact Details</h3>
+            <p><i class="fa-regular fa-envelope"></i> Email: aammn52340@gmail.com</p>
+            <p><i class="fa-solid fa-phone"></i> Phone: +1234567890</p>
+            <p><i class="fa-solid fa-location-dot"></i> Address: 123 Ram Nagar, Jaipur, India</p>
+            <div id="cube-container">
+                <div class="cube" id="cube">
+                    <div class="face front"></div>
+                    <div class="face back"></div>
+                    <div class="face left"></div>
+                    <div class="face right"></div>
+                    <div class="face top"></div>
+                    <div class="face bottom"></div>
+                </div>
+            </div>            
+        </div>
+        <div class="contact-form">
+            <h3>Send us a Message</h3>
+            <form id="contactForm" action="/home" method="POST">
+                <input type="text" id="name" name="name" placeholder="Your Name" required>
+                <input type="email" id="email" name="email" placeholder="Your Email" required>
+                <textarea id="message" name="message" placeholder="Your Message" required></textarea>
+                <button type="submit" class="btn" onclick="launchRocket()">Send Message</button>
+            </form>
+        </div>
+    </div>
+    <div id="rocket" class="rocket">
+        <p>Message received! We will get back to you soon.</p>
+        <img src="https://m.media-amazon.com/images/I/71ZtQnzOU4L._AC_UY1100_.jpg">
+    </div> 
+</section>
+
+    <script>
+        function launchRocket() {
+            var rocket = document.getElementById('rocket');
+            if (rocket) {
+                rocket.style.display = 'flex'; 
+                setTimeout(function() {
+                    location.reload(); 
+                }, 3000);
+            }
+        }
+        function toggleFeatures(button) {
+    var dropdownContent = button.nextElementSibling;
+    dropdownContent.classList.toggle("show");
+}
+
+document.addEventListener('click', function(event) {
+    var dropdowns = document.querySelectorAll('.dropdown-content');
+    dropdowns.forEach(function(dropdown) {
+        if (!dropdown.parentElement.contains(event.target)) {
+            dropdown.classList.remove('show');
+        }
+    });
+});
+document.querySelectorAll('.faq-item .question').forEach(function(question) {
+    question.addEventListener('click', function() {
+        // Find the answer element which is a sibling of the clicked question
+        var answer = this.parentNode.querySelector('.answer');
+        if (answer) {
+            // Toggle the visibility of the answer
+            answer.classList.toggle('show');
+            answer.style.display='block';
+            // Change the text of the toggle button
+            var toggleButton = this.querySelector('.toggle-btn');
+            toggleButton.textContent = answer.classList.contains('show') ? '-' : '+';
+            if(toggleButton.textContent=='+') answer.style.display='none';
+        }
+    });
+});
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var cube = document.getElementById('cube');
+            cube.addEventListener('click', function() {
+                this.classList.toggle('rotated');
+            });
+        });
+             // JavaScript to handle the search functionality and highlight the content
+function searchContent() {
+    const searchInput = document.getElementById('searchInput').value;
+    removeHighlights(); // Always remove existing highlights
+
+    if (searchInput) {
+        highlightText(document.body, searchInput);
+        scrollToHighlight();
+    }
+}
+
+function highlightText(node, text) {
+    const span = document.createElement('span');
+    span.className = 'highlight';
+    const regex = new RegExp(`(${text})`, 'gi');
+
+    if (node.nodeType === 3) {
+        // Text node
+        const match = node.data.match(regex);
+        if (match) {
+            const highlightNode = node.splitText(match.index);
+            highlightNode.splitText(match[0].length);
+            const highlightedText = highlightNode.cloneNode(true);
+            span.appendChild(highlightedText);
+            highlightNode.parentNode.replaceChild(span, highlightNode);
+        }
+    } else if (node.nodeType === 1 && node.childNodes && !/(script|style)/i.test(node.tagName) && node.className !== 'highlight') {
+        // Element node
+        for (let i = 0; i < node.childNodes.length; i++) {
+            highlightText(node.childNodes[i], text);
+        }
+    }
+}
+
+function removeHighlights() {
+    const highlights = document.querySelectorAll('.highlight');
+    highlights.forEach(span => {
+        span.outerHTML = span.innerHTML;
+    });
+}
+
+function scrollToHighlight() {
+    const firstHighlight = document.querySelector('.highlight');
+    if (firstHighlight) {
+        firstHighlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
+// CSS for the highlight effect
+const style = document.createElement('style');
+style.type = 'text/css';
+style.innerHTML = '.highlight { background-color: yellow; }';
+document.head.appendChild(style);
+
+// Add event listener to the search input field to handle clearing highlights when input is cleared
+document.getElementById('searchInput').addEventListener('input', function() {
+    const searchInput = this.value;
+    if (!searchInput) {
+        removeHighlights();
+    }
+});
+    </script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+<script src="/socket.io/socket.io.js"></script> 
+<script src="/js/main.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.js" integrity="sha512-+k1pnlgt4F1H8L7t3z95o3/KO+o78INEcXTbnoJQ/F2VqDVhWoaiVml/OEHv9HsVgxUaVW+IbiZPUJQfF/YxZw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<footer>
+    <p>&copy; 2024 Time Management Software. All rights reserved.</p>
+</footer>

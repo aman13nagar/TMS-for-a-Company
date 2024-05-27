@@ -1,0 +1,129 @@
+<%- include("Partials/header") %>
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    color: #333;
+    margin: 0;
+    padding: 0;
+  }
+
+  .notifications-container {
+    max-width: 800px;
+    margin: 20px auto;
+    display: flex;
+    flex-direction: column-reverse;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .date-section {
+    margin-bottom: 20px;
+  }
+
+  .date-section h2 {
+    margin-bottom: 10px;
+    font-size: 1.5em;
+    color: #007bff;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 5px;
+  }
+
+  .date-section ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column-reverse;
+  }
+
+  .date-section ul li {
+    background-color: #f9f9f9;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+  }
+
+  .date-section ul li:hover {
+    background-color: #e9e9e9;
+  }
+  .no-notifications {
+    text-align: center;
+    font-size: 1.2em;
+    color: #888;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+  }
+</style>
+<div class="notifications-container" id="notifications-container">
+  <!-- Notifications will be dynamically inserted here -->
+</div>
+
+<script>
+  // Properly escape and stringify notifications data within single quotes
+  const notificationsJson = '<%- notifications %>';
+  let notifications = [];
+
+  try {
+    notifications = JSON.parse(notificationsJson);
+    if (!Array.isArray(notifications)) {
+      throw new Error("Notifications is not an array");
+    }
+  } catch (error) {
+    console.error("Error parsing notifications JSON:", error, notificationsJson);
+  }
+
+  function groupNotificationsByDate(notifications) {
+    return notifications.reduce((acc, notification) => {
+      const date = new Date(notification.createdAt).toLocaleDateString();
+      if (!acc[date]) {
+        acc[date] = [];
+      }
+      acc[date].push(notification);
+      return acc;
+    }, {});
+  }
+
+  function renderNotifications(notificationsByDate) {
+    const container = document.getElementById('notifications-container');
+    container.innerHTML = '';
+
+    const dates = Object.keys(notificationsByDate);
+    if (dates.length === 0) {
+      const noNotificationsMessage = document.createElement('div');
+      noNotificationsMessage.classList.add('no-notifications');
+      noNotificationsMessage.innerText = 'You have no notifications at the moment.';
+      container.appendChild(noNotificationsMessage);
+      return;
+    }
+
+    dates.forEach(date => {
+      const dateSection = document.createElement('div');
+      dateSection.classList.add('date-section');
+
+      const dateHeader = document.createElement('h2');
+      dateHeader.innerText = date;
+      dateSection.appendChild(dateHeader);
+
+      const notificationsList = document.createElement('ul');
+      notificationsByDate[date].forEach(notification => {
+        const listItem = document.createElement('li');
+        // If the message contains HTML, use innerHTML instead of innerText
+        listItem.innerHTML = notification.message;
+        notificationsList.appendChild(listItem);
+      });
+
+      dateSection.appendChild(notificationsList);
+      container.appendChild(dateSection);
+    });
+  }
+
+  const notificationsByDate = groupNotificationsByDate(notifications);
+  renderNotifications(notificationsByDate);
+</script>

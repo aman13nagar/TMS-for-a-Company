@@ -6,358 +6,589 @@ const _ = require("lodash");
 const mongoose = require("mongoose");
 const session = require("express-session");
 const passport = require("passport");
+const bcrypt = require('bcrypt');
 const passportLocalMongoose = require("passport-local-mongoose");
 const app = express();
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const nodemailer = require('nodemailer');
 const cron = require('node-cron');
 const multer = require('multer');
+const crypto = require('crypto');
 const path = require('path');
-const { exec } = require('child_process');
+const flash = require('express-flash');
+const cookieParser = require('cookie-parser');
+const { body, validationResult } = require('express-validator');
+app.use(cookieParser());
+const http = require('http');
+const socketIo = require("socket.io");
+const messageController = require('./controllers/messageController');
+const Usercontroller = require('./controllers/Usercontroller');
+const MongoStore = require('connect-mongo');
+const managerController = require('./controllers/managerController');
+const isAuthenticated = require('./middlewares/authmiddleware');
+const { pipeline } = require('stream');
+const server = http.createServer(app);
+const io = socketIo(server);
+var usp = io.of('/user-namespace');
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static("./public"));
-app.use("/uploads",express.static("uploads"));
+app.use(bodyParser.json());
+app.use(express.static("public"));
+app.use("/uploads", express.static("uploads"));
 app.use(session({
-    secret: "Our little secret.",
-    resave: false,
-    saveUninitialized: false
+  secret: "Our little secret.",
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({ mongoUrl: 'mongodb://127.0.0.1/ourDB' }),
+  cookie: { secure: false, maxAge: 12 * 60 * 60 * 1000 }
 }))
-
-// Configure Passport to use the LocalStrategy
+app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 mongoose.set('strictQuery', true);
-mongoose.connect("mongodb+srv://aman13nagar:CmluH9w5Uq88szEZ@cluster0.e3nardl.mongodb.net/OurTMS", { useNewUrlParser: true});
-const userSchema = new mongoose.Schema({
-    username: String,
-    email: String,
-    password: String,
-    phone_no: String
-});
-const appointmentSchema = new mongoose.Schema({
-    username:String,
-    invitedPersons: String,
-    venue: String,
-    dateTime: Date,
-    duration: Number,
-    project:String,
-    project_id:Number,
-    purpose: String
-});
-const Projects=[['Time Management Software (TMS) for a company',1],['Hotel Automation Software',2],['Road Repair and Tracking System (RRTS)',3],
-                ['Judiciary Information System (JIS)' ,4],['Library Information System (LIS)',5],['Restaurant Automation System (RAS)',6],
-                ['Transport company computerization (TCC) software',7],['simulation software',8],['Software component cataloguing software',9],
-                ['Supermarket automation software (SAS)',10],['Book-shop Automation Software (BAS)',11],['structured software analysis and design',12],
-                ['Newspaper Agency Automation Software',13],['University Department Information System',14],['Motor Part Shop Software (MPSS)',15],
-                ['Students’ Auditorium Management Software',16],['Medicine Shop Automation (MSA)',17]]
-const Appointment = mongoose.model('Appointment', appointmentSchema);
-userSchema.plugin(passportLocalMongoose);
-const User = new mongoose.model("User", userSchema);
+mongoose.connect("mongodb+srv://aman13nagar:MvuudGm2Z0LsjwIY@cluster0.e3nardl.mongodb.net/TMS", { useNewUrlParser: true });
+const messageSchema = new mongoose.Schema({
+  username: String,
+  email: String,
+  message: String
+})
+const User = require('./models/UserModal');
+const Projects = [['Time Management Software (TMS) for a company', 1], ['Hotel Automation Software', 2], ['Road Repair and Tracking System (RRTS)', 3],
+['Judiciary Information System (JIS)', 4], ['Library Information System (LIS)', 5], ['Restaurant Automation System (RAS)', 6],
+['Transport company computerization (TCC) software', 7], ['simulation software', 8], ['Software component cataloguing software', 9],
+['Supermarket automation software (SAS)', 10], ['Book-shop Automation Software (BAS)', 11], ['structured software analysis and design', 12],
+['Newspaper Agency Automation Software', 13], ['University Department Information System', 14], ['Motor Part Shop Software (MPSS)', 15],
+['Students’ Auditorium Management Software', 16], ['Medicine Shop Automation (MSA)', 17]]
+const Message = mongoose.model("Message", messageSchema);
 passport.use(User.createStrategy());
 passport.serializeUser(function (user, done) {
-    done(null, user.id);
+  done(null, user.id);
 });
-
 passport.deserializeUser(function (id, done) {
-    User.findById(id, function (err, user) {
-        done(err, user);
-    })
+  User.findById(id, function (err, user) {
+    done(err, user);
+  })
 });
+passport.use(new GoogleStrategy({
+  clientID: process.env.CLIENT_ID,
+  clientSecret: process.env.CLIENT_SECRET,
+  callbackURL: "http://localhost:3000/auth/google/secrets",
+  userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo"
+},
+  function (accessToken, refreshToken, profile, cb) {
+    console.log(profile);
+    User.findOrCreate({ googleId: profile.id }, function (err, user) {
+      return cb(err, user);
+    });
+  }
+));
 app.get("/", function (req, res) {
-    res.render("home-guest");
+  if (req.session.user) req.session.destroy();
+  res.render("home");
 })
-let currexecutive;
-let curremail;
-app.post("/", function (req, res) {
-    currexecutive=req.body.username;
-    curremail=req.body.email;
-    User.register({ username: req.body.username, email: req.body.mail, phone_no: req.body.mobile }, req.body.password, function (err, user) {
-        if (err) {
-            console.log(err);
-            res.redirect("/");
-        }
-        else {
-            passport.authenticate("local")(req, res, function () {
-                res.render("home-dashboard");
-            })
-        }
-    })
-})
-app.post("/home-guestlogin", function (req, res) {
-    currexecutive=req.body.username;
-    curremail=req.body.email;
-    const user = new User({
-        username: req.body.username,
-        password: req.body.password,
-        email: req.body.mail,
-        phone_no: req.body.mobile
-    })
-    req.login(user, function (err) {
-        if (err) {
-            console.log(err);
-            res.redirect("/home-guest");
-        } else {
-            passport.authenticate("local")(req, res, function () {
-                res.render("home-dashboard");
-            })
-        }
-    })
-})
-app.get("/home-dashboard", function (req, res) {
-    res.render("home-dashboard");
-})
-app.get("/home-guestlogin", function (req, res) {
-    res.render("home-guestlogin");
-})
-app.get("/find_slots", function (req, res) {
-    res.render("find_slots");
-})
-  async function rearrangeAppointments(meetingDate) {
-    try {
-        // Retrieve all appointments for the given meeting date
-        const appointments = await Appointment.find({ dateTime: meetingDate });
-        console.log(meetingDate);
-        console.log(appointments);
-        // Sort appointments by priority or any other relevant criteria
-        appointments.sort((a, b) => {
-            // Logic to determine priority, e.g., based on the duration of the meeting
-            return a.duration - b.duration;
-        });
-
-        // Define a function to check if a time slot is available
-        const isSlotAvailable = (startTime, endTime) => {
-            // Check if the time slot overlaps with any existing appointments
-            for (const appointment of appointments) {
-                if (appointment.startTime < endTime && appointment.endTime > startTime) {
-                    return false; // Time slot is not available
-                }
-            }
-            return true; // Time slot is available
-        };
-
-        // Loop through appointments and try to rearrange them
-        for (const appointment of appointments) {
-            // Check if there are alternative time slots available
-            let startTime = new Date(appointment.dateTime);
-            let endTime = new Date(startTime.getTime() + appointment.duration * 60000); // Convert duration to milliseconds
-            console.log(startTime);
-            console.log(endTime);
-            while (!isSlotAvailable(startTime, endTime)) {
-                // Increment startTime to find the next available time slot
-                startTime.setMinutes(startTime.getMinutes() + 15); // Example: Increment by 15 minutes
-                endTime = new Date(startTime.getTime() + appointment.duration * 60000);
-            }
-
-            // Update the appointment with the new time slot
-            appointment.dateTime = endTime;
-            console.log(appointment);
-            // Save the updated appointment to the database
-            await appointment.save();
-        }
-        console.log(appointments)
-        console.log('Appointments rearranged successfully!');
-        //res.send("<script>alert('Slot is not available but don't worry we rearranged your slot');window.location='/home-dashboard';</script>")
-    } catch (error) {
-        console.error('Error rearranging appointments:', error);
-        throw new Error('Error rearranging appointments');
-    }
-}
-app.post('/find_slots',async(req,res)=>{
-    try{
-        const {time,duration}=req.body;
-        let startTime = new Date(time);
-        let endTime = new Date(startTime.getTime() +duration * 60000);
-        let find=await Appointment.find({dateTime:startTime});
-        console.log(find);
-        var Boolean =false;
-        let t=time;
-        for(let k=new Date(startTime);k<=endTime;k.setMinutes(k.getMinutes()+1)){
-          console.log(k);
-          find=await Appointment.find({dateTime:k});
-          if(find.length!=0){
-            Boolean=true;
-            t=k;
-            break;
-          }
-        }
-        console.log(Boolean);
-        if(Boolean==true){
-          console.log("Slot is not Available");
-          rearrangeAppointments(t);
-            //res.status(201).send('Slot is not Available');
-          res.send("<script>alert('Slot is not available but rearranged');window.location='/find_slots';</script>")
-        }
-        else{
-          console.log("Slot is Available");
-            //res.redirect('/schedule');
-          res.send("<script>alert('Slot is available you can book now');window.location='/schedule';</script>")
-        }
-    } catch(error){
-        //res.status(201).send('slot is not Available');
-        console.log("Error",error);
-    }
-})
-app.get("/schedule", function (req, res) {
-    res.render("schedule",{Projects});
-})
+app.get("/auth/google",
+  passport.authenticate("google", { scope: ["profile"] })
+)
+app.get("/auth/google/home-dashboard",
+  passport.authenticate('google', { failureRedirect: "/home-guest" }),
+  function (req, res) {
+    res.redirect('/home-dashboard');
+  }
+)
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.USER,
-      pass: process.env.APP_PASSWORD
+  service: 'gmail',
+  auth: { user: process.env.USER, pass: process.env.APP_PASSWORD },
+});
+app.post("/home", async (req, res) => {
+  const { name, email, message } = req.body;
+  const mess = new Message({
+    username: name,
+    email: email,
+    message: message
+  })
+  console.log(email);
+  await mess.save();
+  const mailOptions = {
+    from: email,
+    to: 'aammn52340@gmail.com',
+    subject: 'Contact purpose',
+    text: `${message}`
+  };
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error('Error sending verification email:', error);
+    } else {
+      console.log('Verification email sent:', info.response);
     }
   });
-  
-  // Function to send email notification
-  const sendEmailNotification = async (username,recipientEmail,venue,time,duration,purpose) => {
-    try {
-      await transporter.sendMail({
-        from: 'aammn52340@gmail.com',
-        to: recipientEmail,
-        subject: 'Appointment Confirmation',
-        text: 'Your appointment has been registered successfully.Please find the meeting details:'
-      });
-      console.log('Email notification sent successfully.');
-    } catch (error) {
-      console.error('Error sending email notification:', error);
-    }
-  };
-  
-app.post('/schedule', async (req, res) => {
-
-    try {
-        const { username,invitedPersons, venue, dateTime, duration,project, purpose } = req.body;
-        let startTime = new Date(dateTime);
-        let endTime = new Date(startTime.getTime() +duration * 60000);
-        const today=new Date();
-        const startDateDate= new Date(startTime);
-        if(startDateDate<today){
-          res.send("<script>alert('error:Start date must be in the future');window.location='/schedule';</script>")
-        }
-        else if(username!==currexecutive){
-          res.send("<script>alert('Please enter a valid username');window.location='/schedule';</script>")
-        }
-        else{
-        let find=await Appointment.find({dateTime:startTime});
-        console.log(find);
-        var Boolean =false;
-        let t=dateTime;
-        for(let k=new Date(startTime);k<=endTime;k.setMinutes(k.getMinutes()+1)){
-          console.log(k);
-          find=await Appointment.find({dateTime:k});
-          if(find.length!=0){
-            Boolean=true;
-            t=k;
-            break;
-          }
-        }
-        console.log(Boolean);
-        if(Boolean==true){
-          console.log("Slot is not Available");
-          rearrangeAppointments(t);
-            //res.status(201).send('Slot is not Available');
-          res.send("<script>alert('Slot is not available but rearranged');window.location='/schedule';</script>")
-        }
-        else{
-        const projectArray = JSON.parse(project);
-        console.log(projectArray);
-        console.log(projectArray[0],project[1]);
-        const appointment = new Appointment({ username,invitedPersons, venue, dateTime, duration,project:projectArray[0],project_id:projectArray[1], purpose });
-        await appointment.save();
-        // Send email notification to the person
-        await sendEmailNotification(username,invitedPersons,venue,dateTime,duration,purpose);
-        //res.status(201).send('Appointment registered successfully.');
-        res.send("<script>alert('Appointment registered successfully.Please check your email');window.location='/home-dashboard';</script>");
-        //sendSuccessResponse(res,"Appointment registered successfully. For further details please check your Email");
-        }
-      }
-    } catch (error) {
-        console.error('Error registering appointment:', error);
-        res.status(500).send('An error occurred while registering the appointment.');
-    }
-});
-app.get('/check_appointments', async (req, res) => {
-  if (!req.isAuthenticated()) {
-    // Redirect to login page or handle unauthorized access
-    return res.redirect('/');
-  }
-  const appointments = await Appointment.find({ username: req.user.username });
-  console.log(appointments);
-  console.log(req.user.username);
-  Appointment.find({username:req.user.username},function(err, username){
-    res.render("check_appointments", {username});
-  })
-});
-app.get("/leave",async(req,res)=>{
-  res.render("leave");
 })
-const leaveSchema =new mongoose.Schema({
-  username:String,
-  startDate:String,
-  endDate:String,
-  applyDate:String,
-  purpose:String,
-  document:String
+app.get("/home-guest", function (req, res) {
+  if (req.session.user) req.session.destroy();
+  res.render("home-guest");
 })
-const Leave =mongoose.model('Leave',leaveSchema);
-app.post('/leave', async (req, res) => {
+function generateCode() {
+  return Math.floor(100000 + Math.random() * 900000); // Generates a 6-digit code
+}
+app.post("/home-guest", async (req, res, next) => {
   try {
-      const startDate=req.body.startDate;
-      const endDate=req.body.endDate;
-      const purpose=req.body.purpose;
-      const link=req.body.document;
-      console.log(startDate,endDate);
-      const today=new Date();
-      //const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-      const startDateDate= new Date(startDate);
-      console.log(startDateDate);
-      console.log(today);
-      if (startDate >= endDate) {
-          res.send("<script>alert('error:End date must be after start date.');window.location='/leave';</script>");
+    const { username, mail: email, mobile, password, role } = req.body;
+    const emailExists = await User.exists({ email });
+    const mobileExists = await User.exists({ phone_no: mobile });
+    if (emailExists || mobileExists) {
+      //req.flash('error', 'Email or mobile number already exists.');
+      return res.render("home-guest", { messages: { error: 'Email or mobile number already exists' } });
+    }
+    const code = generateCode();
+    await sendVerificationEmail(email, code);
+    const newUser = new User({
+      username,
+      email,
+      phone_no: mobile,
+      role,
+      emailVerificationToken: code
+    });
+    User.register(newUser, password, (err, user) => {
+      if (err) {
+        console.error('Error registering user:', err);
+        //req.flash('error', 'An error occurred during registration.');
+        return res.redirect("/home-guest");
       }
-      else if(startDateDate<today){
-        res.send("<script>alert('error:Start date must be in the future');window.location='/leave';</script>")
-      }
-      else{
-      // Save leave application to the database
-      const leave = new Leave({
-          username:currexecutive,
-          startDate:startDate,
-          endDate:endDate,
-          applyDate:today,
-          purpose:purpose,
-          document:link
+      req.logIn(user, (err) => {
+        if (err) {
+          return next(err);
+        }
+        return res.render("verify-cred", { email });
       });
-      await leave.save();
-      try {
-        await transporter.sendMail({
-          from: 'aammn52340@gmail.com',
-          to: 'aman13nagar@gmail.com',
-          subject: 'Leave confirmation',
-          text: 'Leave application submitted successfully'
-        });
-        console.log('Email notification sent successfully.');
-      } catch (error) {
-        console.error('Error sending email notification:', error);
-      }
-      res.send("<script>alert('Leave application submitted successfully. Please check your email');window.location='/leave';</script>");
-      }
+    });
   } catch (error) {
-      console.log('Error submitting leave application:', error);
-      //res.status(500).json({ error: 'An error occurred while processing your request.' });
+    console.error('Error during registration:', error);
+    return res.redirect("/home-guest");
   }
 });
-app.get("/checkleaves",async(req,res)=>{
-  if (!req.isAuthenticated()) {
-    // Redirect to login page or handle unauthorized access
-    return res.redirect('/');
+function sendVerificationEmail(email, verificationCode) {
+  const mailOptions = {
+    from: 'aammn52340@gmail.com',
+    to: email,
+    subject: 'Email Verification',
+    text: `Enter this code to verify your email: ${verificationCode}`
+  };
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error('Error sending verification email:', error);
+    } else {
+      console.log('Verification email sent:', info.response);
+    }
+  });
+}
+const Task = require('./models/TaskModal');
+app.post('/verify-cred', async (req, res) => {
+  const code = req.body.code;
+  const cuser = await User.findOne({ emailVerificationToken: code });
+  console.log(cuser);
+  var users = await User.find();
+  if (cuser) {
+    let totalTasks;
+    let totalMeetings = await Meeting.find({ createdBy: cuser._id }).count();
+    if (cuser.role == 'manager') {
+      totalTasks = await Task.find({ createdBy: cuser._id }).count();
+    }
+    else {
+      totalTasks = await Task.find({ assignedTo: cuser._id }).count();
+    }
+    console.log(code, cuser.email);
+    return res.render('home-guestlogin', {
+      cuser: cuser, email: cuser.email, username: cuser.username
+      , users: users, totalTasks: 0, completetasks: 0, pendingtasks:
+        0, overduetasks: 0, totalMeetings: totalMeetings,
+      messages: { success: 'Verification successful' }
+    });
+  } else {
+    console.log(req.session.user);
+    await User.deleteOne({ email: req.body.email });
+    return res.render('verify-cred', {
+      cuser: null, email: null, username: null, users: null,
+      totalTasks: 0, completetasks: 0, pendingtasks: 0, overduetasks: 0, totalMeetings: 0,
+      messages: { error: 'Verification failed! Register Again' }
+    });
   }
-  const leaves=await Leave.find({username:currexecutive});
-  console.log(leaves);
-  //res.render("checkleaves",{leaves});
-  Leave.find({username:currexecutive},function(err, username){
-    res.render("checkleaves", {leaves});
+});
+app.delete('/delete-user', isAuthenticated, async (req, res) => {
+  try {
+    const email = req.body.useremail;
+    await User.deleteOne({ email: email });
+    res.json({ success: true });
+  } catch (error) {
+    res.json({ success: false, error: error.message });
+  }
+});
+const LeaveRequest = require('./models/LeaveRequest');
+
+const vsp = io.of('/home-namespace');
+
+vsp.on('connection', async (socket) => {
+  console.log('User in Home-dashboard');
+  console.log(socket.handshake.auth.token);
+  var userid = socket.handshake.auth.token;
+  const user = await User.findOne({ _id: userid });
+  if (user) {
+    let totalTasks, tasks, totalleaves;
+    if (user.role === 'manager') {
+      totalTasks = await Task.find({ createdBy: user._id }).countDocuments();
+      tasks = await Task.find({ createdBy: user._id });
+    } else {
+      totalTasks = await Task.find({ assignedTo: user._id }).countDocuments();
+      tasks = await Task.find({ assignedTo: user._id });
+      totalleaves = await LeaveRequest.find({ createdBy: user._id }).countDocuments();
+    }
+    let completetasks = 0, pendingtasks = 0, overduetasks = 0;
+    let totalMeetings = await Meeting.find({
+      $or: [
+        { createdBy: user._id },
+        { attendees: user.email }
+      ]
+    }).countDocuments();
+    let meetings = await Meeting.find({
+      $or: [
+        { createdBy: user._id },
+        { attendees: user.email }
+      ]
+    });
+
+    tasks.forEach(task => {
+      if (task.status === 'completed') {
+        completetasks++;
+      } else if (task.status === 'in progress') {
+        pendingtasks++;
+      } else {
+        overduetasks++;
+      }
+    });
+    const dailyData = {};
+    const monthlyData = {};
+    const yearlyData = {};
+    meetings.forEach(meeting => {
+      const date = new Date(meeting.start);
+      const day = date.toISOString().split('T')[0]; // yyyy-mm-dd
+      const month = date.toISOString().slice(0, 7); // yyyy-mm
+      const year = date.getFullYear().toString(); // yyyy
+
+      const duration = (new Date(meeting.end) - new Date(meeting.start)) / (1000 * 60); // Convert milliseconds to minutes
+
+      if (!dailyData[day]) dailyData[day] = 0;
+      dailyData[day] += duration;
+
+      if (!monthlyData[month]) monthlyData[month] = 0;
+      monthlyData[month] += duration;
+
+      if (!yearlyData[year]) yearlyData[year] = 0;
+      yearlyData[year] += duration;
+    });
+
+    user.totalMeetings = totalMeetings;
+    user.totalTasks = totalTasks;
+    user.totalLeaves = totalleaves;
+    user.CompletedTasks = completetasks;
+    user.PendingTasks = pendingtasks;
+    user.OverdueTasks = overduetasks;
+    user.dailyData = dailyData;
+    user.monthlyData = monthlyData;
+    user.yearlyData = yearlyData;
+    vsp.emit('updatestates', user);
+  }
+  socket.on('disconnect', async function () {
+    console.log('user Disconnected');
+  });
+});
+
+app.post("/home-guestlogin", [
+  body('email').notEmpty().withMessage('Email is required').isEmail().withMessage('Invalid email format'),
+  body('password').notEmpty().withMessage('Password is required')
+], (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    // If there are validation errors, redirect back to login with error messages
+   // req.flash('error', errors.array().map(err => err.msg).join(' '));
+    return res.render('home-guestlogin',{messages:{error:'error'}});
+  }
+
+  console.log(req.body.email);
+  passport.authenticate('local', async (err, user, info) => {
+    if (err) {
+      console.log(err);
+      return next(err);
+    }
+    console.log(user);
+    if (!user) {
+     // req.flash('error', 'Email or password is incorrect!');
+      return res.render('home-guestlogin',{messages:{error:'Email or password is incorrect!'}});
+    }
+    req.logIn(user, async (err) => {
+      if (err) {
+        return next(err);
+      }
+
+      const cuser = await User.findOne({ email: req.body.email });
+      if (!cuser) {
+        //req.flash('error', 'User not found!');
+        return res.render('home-guestlogin',{messages:{error:'User not found!'}});
+      }
+
+      req.session.user = user; // Store the authenticated user in the session
+
+      let totalTasks, tasks, totalleaves;
+      if (cuser.role === 'manager') {
+        totalTasks = await Task.find({ createdBy: cuser._id }).countDocuments();
+        tasks = await Task.find({ createdBy: cuser._id });
+      } else {
+        totalTasks = await Task.find({ assignedTo: cuser._id }).countDocuments();
+        tasks = await Task.find({ assignedTo: cuser._id });
+        totalleaves = await LeaveRequest.find({ createdBy: cuser._id }).countDocuments();
+      }
+      let completetasks = 0, pendingtasks = 0, overduetasks = 0;
+      let totalMeetings = await Meeting.find({
+        $or: [
+          { createdBy: cuser._id },
+          { attendees: cuser.email }
+        ]
+      }).countDocuments();
+      let meetings = await Meeting.find({
+        $or: [
+          { createdBy: cuser._id },
+          { attendees: cuser.email }
+        ]
+      });
+
+      tasks.forEach(task => {
+        if (task.status === 'completed') {
+          completetasks++;
+        } else if (task.status === 'in progress') {
+          pendingtasks++;
+        } else {
+          overduetasks++;
+        }
+      });
+      const dailyData = {};
+      const monthlyData = {};
+      const yearlyData = {};
+
+      meetings.forEach(meeting => {
+        const date = new Date(meeting.start);
+        const day = date.toISOString().split('T')[0]; // yyyy-mm-dd
+        const month = date.toISOString().slice(0, 7); // yyyy-mm
+        const year = date.getFullYear().toString(); // yyyy
+
+        const duration = (new Date(meeting.end) - new Date(meeting.start)) / (1000 * 60); // Convert milliseconds to minutes
+
+        if (!dailyData[day]) dailyData[day] = 0;
+        dailyData[day] += duration;
+
+        if (!monthlyData[month]) monthlyData[month] = 0;
+        monthlyData[month] += duration;
+
+        if (!yearlyData[year]) yearlyData[year] = 0;
+        yearlyData[year] += duration;
+      });
+      cuser.totalMeetings = totalMeetings;
+      cuser.totalTasks = totalTasks;
+      cuser.totalLeaves = totalleaves;
+      cuser.CompletedTasks = completetasks;
+      cuser.PendingTasks = pendingtasks;
+      cuser.OverdueTasks = overduetasks;
+      cuser.dailyData = dailyData;
+      cuser.monthlyData = monthlyData;
+      cuser.yearlyData = yearlyData;
+      await cuser.save();
+      console.log(req.session.user);
+      req.session.user = cuser;
+      res.cookie('user', JSON.stringify(cuser));
+
+      return res.render('home-dashboard', {
+        username: cuser.username,
+        cuser,
+        users: await User.find(),
+      });
+    });
+  })(req, res, next);
+});
+app.get("/home-dashboard", isAuthenticated, async (req, res) => {
+  var users = await User.find();
+  const user= req.session.user;
+  var cuser=await User.findById({_id:user._id});
+  let totalTasks, tasks, totalleaves;
+  if (cuser.role == 'manager') {
+    totalTasks = await Task.find({ createdBy: cuser._id }).countDocuments();
+    tasks = await Task.find({ createdBy: cuser._id });
+  }
+  else {
+    totalTasks = await Task.find({ assignedTo: cuser._id }).countDocuments();
+    tasks = await Task.find({ assignedTo: cuser._id });
+    totalleaves = await LeaveRequest.find({ createdBy: cuser._id }).countDocuments();
+  }
+  let totalMeetings = await Meeting.find({
+    $or: [
+      { createdBy: cuser._id },
+      { attendees: cuser.email }
+    ]
+  }).countDocuments();
+  let meetings = await Meeting.find({
+    $or: [
+      { createdBy: cuser._id },
+      { attendees: cuser.email }
+    ]
+  });
+  let completetasks = 0, pendingtasks = 0, overduetasks = 0;
+  tasks.forEach(task => {
+    if (task.status == 'completed') {
+      completetasks++;
+    }
+    else if (task.status == 'in progress') {
+      pendingtasks++;
+    }
+    else {
+      overduetasks++;
+    }
   })
+  const dailyData = {};
+  const monthlyData = {};
+  const yearlyData = {};
+
+  meetings.forEach(meeting => {
+    const date = new Date(meeting.start);
+    const day = date.toISOString().split('T')[0]; // yyyy-mm-dd
+    const month = date.toISOString().slice(0, 7); // yyyy-mm
+    const year = date.getFullYear().toString(); // yyyy
+
+    const duration = (new Date(meeting.end) - new Date(meeting.start)) / (1000 * 60); // Convert milliseconds to minutes
+
+    if (!dailyData[day]) dailyData[day] = 0;
+    dailyData[day] += duration;
+
+    if (!monthlyData[month]) monthlyData[month] = 0;
+    monthlyData[month] += duration;
+
+    if (!yearlyData[year]) yearlyData[year] = 0;
+    yearlyData[year] += duration;
+  });
+  cuser.totalMeetings = totalMeetings;
+  cuser.totalTasks = totalTasks;
+  cuser.totalLeaves = totalleaves;
+  cuser.CompletedTasks = completetasks;
+  cuser.PendingTasks = pendingtasks;
+  cuser.OverdueTasks = overduetasks;
+  cuser.dailyData = dailyData;
+  cuser.monthlyData = monthlyData;
+  cuser.yearlyData = yearlyData;
+  await cuser.save();
+  req.session.user = cuser;
+  res.render("home-dashboard", {
+    cuser:req.session.user, users
+  });
+})
+app.get("/home-guestlogin", function (req, res) {
+  try {
+    console.log(req.session.user);
+    if (req.session.user) req.session.destroy();
+    res.render("home-guestlogin");
+  } catch (error) {
+    res.redirect('/');
+  }
+})
+app.get("/forgot-password", function (req, res) {
+  res.render("forgot-password");
+})
+app.post('/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  console.log(email);
+  const user = await User.findOne({ email: email });
+  console.log(user);
+  if (!user) {
+    return res.status(404).send('User not found');
+  }
+  // Generate a unique token
+  const token = crypto.randomBytes(20).toString('hex');
+  // Store the token in memory (replace with database in production)
+  user.resetToken = token;
+  console.log(user);
+  await user.save();
+  const mailOptions = {
+    from: 'aammn52340@gmail.com',
+    to: email,
+    subject: 'Password Reset Request',
+    text: `To reset your password, click the following link: http://localhost:3000/reset_password?token=${token}`
+  };
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.log(error);
+      //req.flash('error', 'An Error occured please try later !');
+      return res.render('forgot-password',{messages:{error:'An Error occured please try later!'}});
+    }
+    console.log('Email sent: ' + info.response);
+    //res.send('Password reset email sent');
+    //req.flash('success', 'Password reset email sent. Please check your email !!');
+    return res.render('forgot-password',{messages:{success:'Password reset email sent. Please check your email !!'}});
+  });
+});
+app.get("/reset_password", function (req, res) {
+  const { token } = req.query;
+  res.render("reset_password", { token });
+})
+app.post('/reset_password', async (req, res) => {
+  const { email, token, newPassword } = req.body;
+  const user = await User.findOne({ resetToken: token });
+  if (!user) {
+    //req.flash('error', 'An error occured please try again !');
+    return res.render('reset_password',{messages:{error:'An error occured please try again!'}})
+  }
+  user.setPassword(newPassword, function (err) {
+    if (err) {
+      console.error("Error updating password:", err);
+      return res.status(500).send("Error updating password");
+    }
+    user.save(function (err) {
+      if (err) {
+        console.error("Error saving user after password update:", err);
+        return res.status(500).send("Error updating password");
+      }
+      //req.flash('success', 'Password updated successsfully');
+      return res.render('reset_password',{token:token,messages:{success:'Password updated successfully'}});
+    });
+  });
+});
+app.get("/find_slots", isAuthenticated, function (req, res) {
+  res.render("find_slots");
+})
+app.post('/find_slots', isAuthenticated, async (req, res) => {
+  try {
+    const { time, duration } = req.body;
+    let startTime = new Date(time);
+    let endTime = new Date(startTime.getTime() + duration * 60000);
+    let find = await Meeting.find({ start: startTime });
+    console.log(find);
+    var Boolean = false;
+    let t = time;
+    for (let k = new Date(startTime); k <= endTime; k.setMinutes(k.getMinutes() + 1)) {
+      console.log(k);
+      find = await Meeting.find({ start: k });
+      if (find.length != 0) {
+        Boolean = true;
+        t = k;
+        break;
+      }
+    }
+    console.log(Boolean);
+    if (Boolean == true) {
+      console.log("Slot is not Available");
+      req.flash('error', 'Slot is not available');
+      res.redirect('/find_slots');
+    }
+    else {
+      console.log("Slot is Available");
+      req.flash('success', 'Slot is Available. You can schedule your Meeting');
+      res.redirect('/find_slots');
+    }
+  } catch (error) {
+    console.log("Error", error);
+  }
 })
 // Multer storage configuration
 const storage = multer.diskStorage({
@@ -371,197 +602,387 @@ const storage = multer.diskStorage({
 });
 
 // Initialize multer upload
-const profileSchema = new mongoose.Schema({
-  username: String,
-  profilePictureUrl: String
-});
-const Profile = mongoose.model('Profile', profileSchema);
 const upload = multer({ storage: storage });
-
-// Endpoint to handle profile picture uploads
-app.get('/upload-profile-picture',async(req,res)=>{
+app.get('/upload-profile-picture', isAuthenticated, async (req, res) => {
   res.render('upload-profile-picture');
 })
-app.post('/upload-profile-picture', upload.single('profilePicture'),async (req, res) => {
+app.post('/upload-profile-picture', isAuthenticated, upload.single('profilePicture'), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded' });
   }
-  const profilePictureUrl = req.file.path; // Change this to the actual URL if storing in a cloud service
+  const profilePictureUrl = req.file.path;
   console.log(profilePictureUrl)
   try {
-    const profile = new Profile({
-      username: currexecutive, // Add the name of the user
-      profilePictureUrl: profilePictureUrl
-    });
-    await profile.save();
+    await User.findByIdAndUpdate({ _id: req.session.user._id }, {
+      $set: {
+        profilePictureUrl: profilePictureUrl
+      }
+    })
+    const updateduser = await User.findById({ _id: req.session.user._id });
+    req.session.user = updateduser;
     res.status(200).json({ message: 'Profile picture uploaded successfully', profilePictureUrl });
-    //res.send("<script>alert('Profile picture uploaded successfully');window.location='/profile';</script>")
   } catch (error) {
     console.error('Error saving profile picture to database:', error);
-    //res.status(500).json({ error: 'An error occurred while saving profile picture to database' });
   }
 });
-app.get("/profile",async(req,res)=>{
-  if(!req.isAuthenticated()){
-    return res.redirect('/');
+app.get("/profile", isAuthenticated, async (req, res) => {
+  const user = req.session.user;
+  if (!user) {
+    return res.redirect('/')
   }
-  const user=await User.find({username:req.user.username});
-  console.log(user)
-  const profile=await Profile.find({username:currexecutive});
-  console.log(profile);
-  console.log(user);
-  console.log(req.user.username);
-  User.find({username:req.user.username},function(err,user){
-    res.render("profile",{user,profile});
-  })
+  res.render('profile', { user: user });
 })
-app.get('/statistics', async (req, res) => {
+const { getTaskTimeStats } = require('./utils/getTaskTimestates');
+const { getLeaveTimeStats } = require('./utils/getLeaveTimestates');
+app.get('/statistics', isAuthenticated, async (req, res) => {
   try {
-      // Get executive meeting time stats
-      const stats1 = await getExecutiveMeetingTimeStats();
-      const uniqueStats1 = new Set();
-      stats1.forEach(row => {
-        const rowString = JSON.stringify(row); // Convert the row object to a string
-        uniqueStats1.add(rowString); // Add the string representation of the row to the Set
-      });
-      const executiveMeetingTimeStats = Array.from(uniqueStats1).map(rowString => JSON.parse(rowString));
-      // Get project meeting stats
-      const stats = await getProjectMeetingStats();
-      const uniqueStats = new Set();
-      stats.forEach(row => {
-        const rowString = JSON.stringify(row); // Convert the row object to a string
-        uniqueStats.add(rowString); // Add the string representation of the row to the Set
-      });
-      const projectMeetingStats = Array.from(uniqueStats).map(rowString => JSON.parse(rowString));
-      // Get average executive meeting time
-      const averageExecutiveMeetingTime = await getAverageExecutiveMeetingTime();
-      const labels=[];
-      const data=[];
-      for(let i=0;i<executiveMeetingTimeStats.length;i++){
-        labels.push(executiveMeetingTimeStats[i].executive);
-        data.push(executiveMeetingTimeStats[i].totalMeetingTime);
-      }
-      console.log(labels,data);
-      const labels1=[];
-      const data1=[];
-      for(let i=0;i<projectMeetingStats.length;i++){
-        if(projectMeetingStats[i].project!==undefined){
-          labels1.push(projectMeetingStats[i].project_id);
-          data1.push(projectMeetingStats[i].totalMeetingTime);
-        }
-      }
-      console.log(currexecutive);
-      // const currexecutive=;
-      console.log(labels1,data1);
-      res.render('statistics', { executiveMeetingTimeStats, projectMeetingStats, averageExecutiveMeetingTime,labels,data,labels1,data1,
-      currexecutive});
-  } catch (error) {
-      console.error('Error retrieving statistics:', error);
-      res.status(500).send('An error occurred while retrieving statistics.');
-  }
-});
-// Function to get statistics for executive meeting time
-async function getExecutiveMeetingTimeStats() {
-  // Retrieve all executives
-  const executives = await User.find();
-  //console.log(executives);
-  // Iterate through executives and calculate their total meeting time
-  const stats = [];
-  for (const executive of executives) {
-      const meetings = await Appointment.find({ username: executive.username });
-      console.log(meetings)
-      const totalMeetingTime = meetings.reduce((total, meeting) => total + meeting.duration, 0);
-      stats.push({ executive: executive.username, totalMeetingTime });
-  }
-  return stats;
-}
-// Function to get statistics for project meetings
-async function getProjectMeetingStats() {
-  // Retrieve all projects
-  const projects = await Appointment.find();
-  // Iterate through projects and calculate the number of meetings and total meeting time
-  const stats = [];
-  for (const project of projects) {
-      const meetings = await Appointment.find({ project:project.project});
-      const numMeetings = meetings.length;
-      const totalMeetingTime = meetings.reduce((total, meeting) => total + meeting.duration, 0);
-      stats.push({ project: project.project,project_id:project.project_id, numMeetings, totalMeetingTime });
-  }
-  return stats;
-}
-// Function to calculate the average executive meeting time
-async function getAverageExecutiveMeetingTime() {
-  // Retrieve all meetings
-  const meetings = await Appointment.find();
-  // Calculate total meeting time and total number of executives
-  const totalMeetingTime = meetings.reduce((total, meeting) => total + meeting.duration, 0);
-  const totalExecutives = await User.countDocuments();
-  // Calculate average meeting time per executive
-  const averageMeetingTime = totalMeetingTime / totalExecutives;
-  return averageMeetingTime;
-}
-app.post('/home-dashboard', function (req, res, next) {
-    req.logout(function (err) {
-        if (err) { return next(err); }
-        res.redirect('/');
+    const taskTimeStats = await getTaskTimeStats();
+    const leaveTimeStats = await getLeaveTimeStats();
+    res.render('statistics', {
+      taskTimeStats, leaveTimeStats,
     });
+  } catch (error) {
+    console.error('Error retrieving statistics:', error);
+    res.status(500).send('An error occurred while retrieving statistics.');
+  }
 });
-// Schedule the task to run every morning at 8:00 AM
+
 function generateEmailContent(executiveAppointments) {
-  let emailContent = "Your appointments for today:\n\n";
-
+  let emailContent = "Your Task for today:\n\n";
   executiveAppointments.forEach((appointment, index) => {
-    const { venue, dateTime, duration, purpose } = appointment;
-    const startTime = new Date(dateTime);
-    const endTime = new Date(dateTime.getTime() + duration * 60000); // Convert duration from minutes to milliseconds
-
-    emailContent += `Appointment ${index + 1}:\n`;
-    emailContent += `Venue: ${venue}\n`;
-    emailContent += `Date and Time: ${startTime.toLocaleString()} - ${endTime.toLocaleString()}\n`;
-    emailContent += `Purpose: ${purpose}\n\n`;
+    const { title, description, priority, dueDate, status, calendarEvent } = appointment;
+    emailContent += `Task ${index + 1}:\n`
+    emailContent += `Title: ${title}\n`
+    emailContent += `Description: ${description}\n`
+    emailContent += `Priority: ${priority}\n`
+    emailContent += `Due Date: Today\n`
+    emailContent += `Status: ${status}\n`
+    emailContent += `View on Calendar: ${calendarEvent.htmlLink}\n\n`
   });
-
   return emailContent;
 }
-//Every morning user will get notification through mail
-cron.schedule('32 11 * * *', async (req,res) => {
+//Every morning user will get notification through email
+cron.schedule('0 8 * * *', async (req, res) => {
   try {
-    // Query the database for appointments scheduled for the current day
     const today = new Date();
     console.log(today);
-    const appointments = await Appointment.find({ dateTime: { $gte: today, $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000) } });
-    //console.log(appointments);
-    // Retrieve email addresses of all executives
-    const executives = await User.find();
-    //console.log(executives);
-    // Iterate through each executive's appointments and compile them into an email
-    for (const executive of executives) {
-      const executiveAppointments = appointments.filter(appointment => appointment.username === executive.username);
-      console.log(executive.username);
+    const tasks = await Task.find({ dueDate: { $gte: today, $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000) } });
+    const employees = await User.find({ role: 'employee' });
+    for (const employee of employees) {
+      const executiveAppointments = tasks.filter(task => task.assignedTo === employee._id);
       console.log(executiveAppointments);
-      if(executiveAppointments.length!==0) {console.log(executiveAppointments[0].username)};
-      const emailContent = generateEmailContent(executiveAppointments); // Implement this function to generate email content
+      const emailContent = generateEmailContent(executiveAppointments);
       console.log(emailContent);
-      // Send email to the executive
-      if(executiveAppointments.length!==0&&executiveAppointments[0].username===executive.username){
+      if (executiveAppointments.length !== 0) {
         await transporter.sendMail({
           from: 'aammn52340@gmail.com',
-          to: 'aman13nagar@gmail.com',
-          subject: 'Your Appointments for Today',
+          to: employee.email,
+          subject: 'Complete your task by Today',
           text: emailContent
         });
-        console.log(`Email sent to ${executive.username}`);
+        console.log(`Email sent to ${employee.username}`);
       }
     }
   } catch (error) {
     console.error('Error sending daily appointment emails:', error);
   }
-// }, {
-//   scheduled: true,
-//   timezone: 'America/New_York' // Set your timezone here
-    console.log("Scheduled task running at 2:10pm");
+  // }, {
+  //   scheduled: true,
+  //   timezone: 'America/New_York' // Set your timezone here
+  console.log("Scheduled task running at 2:10pm");
 });
+// Socket.io
+const chatSchema = new mongoose.Schema({
+  sender_id: String,
+  receiver_id: String,
+  message: String
+});
+const Chat = mongoose.model('Chat', chatSchema);
+app.post('/save-chat', isAuthenticated, async (req, res) => {
+  try {
+    var chat = new Chat({
+      sender_id: req.body.sender_id,
+      receiver_id: req.body.receiver_id,
+      message: req.body.message
+    });
+    var newChat = await chat.save();
+    res.status(200).send({ success: true, msg: 'chat inserted!', data: newChat });
+  } catch (error) {
+    console.log("false");
+    res.status(200).send({ success: false, msg: error.message });
+  }
+})
+app.post('/delete-chat', isAuthenticated, async (req, res) => {
+  try {
+    await Chat.deleteOne({ _id: req.body.id });
+    res.status(200).send({ success: true });
+  } catch (error) {
+    console.log(error);
+    res.status(200).send({ success: false, msg: error.message });
+  }
+})
+app.post('/update-chat', isAuthenticated, async (req, res) => {
+  try {
+    await Chat.findByIdAndUpdate({ _id: req.body.id }, {
+      $set: {
+        message: req.body.message
+      }
+    })
+    res.status(200).send({ success: true });
+  } catch (error) {
+    res.status(500).send({ success: false, msg: error.message });
 
-app.listen(3000, function () {
-    console.log("Server started on port 3000");
+  }
+})
+var usp = io.of('/user-namespace');
+usp.on('connection', async (socket) => {
+  console.log('User connected');
+  console.log(socket.handshake.auth.token);
+  var userid = socket.handshake.auth.token;
+  await User.findByIdAndUpdate({ _id: userid }, { $set: { is_online: '1' } });
+  socket.broadcast.emit('getOnlineUser', { user_id: userid });
+  socket.on('disconnect', async function () {
+    console.log('user Disconnected');
+    var userid = socket.handshake.auth.token;
+    console.log(userid);
+    await User.findByIdAndUpdate({ _id: userid }, { $set: { is_online: '0' } });
+    socket.broadcast.emit('getOfflineUser', { user_id: userid });
+  })
+  socket.on('newChat', function (data) {
+    console.log(data);
+    socket.broadcast.emit('loadNewChat', data);
+  })
+  //old chats
+  socket.on('existsChat', async function (data) {
+    var chats = await Chat.find({
+      $or: [
+        { sender_id: data.sender_id, receiver_id: data.receiver_id },
+        { sender_id: data.receiver_id, receiver_id: data.sender_id }
+      ]
+    });
+    socket.emit('loadChats', { chats: chats });
+  })
+  socket.on('chatDeleted', function (id) {
+    console.log(id);
+    socket.broadcast.emit('chatMessageDeleted', id);
+  })
+  socket.on('chatUpdated', function (data) {
+    console.log(data.id, data.message);
+    socket.broadcast.emit('chatMessageUpdated', data);
+  })
+  ///group chat
+  socket.on('newGroupChat', function (data) {
+    socket.broadcast.emit('loadNewGroupMessage', data);
+  })
+  //delete chat broadcast
+  socket.on('groupChatDeleted', function (id) {
+    socket.broadcast.emit('DeletedGroupChat', id);
+  })
+  //update chat broadcast
+  socket.on('groupChatUpdated', function (data) {
+    socket.broadcast.emit('UpdatedGroupChat', data);
+  })
+})
+app.get('/groups', isAuthenticated, Usercontroller.loadGroups);
+app.post('/groups', isAuthenticated, Usercontroller.createGroup);
+app.post('/get-members', isAuthenticated, async (req, res) => {
+  try {
+    var users = await User.aggregate([
+      {
+        $lookup: {
+          from: "members",
+          localField: "_id",
+          foreignField: "user_id",
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$group_id", mongoose.Types.ObjectId(req.body.group_id)] }
+                  ]
+                }
+              }
+            }
+          ],
+          as: "member"
+        }
+      },
+      {
+        $match: {
+          "_id": {
+            $nin: [mongoose.Types.ObjectId(req.session.user._id)]
+          }
+        }
+      }
+    ]);
+    res.status(200).send({ success: true, data: users });
+  } catch (error) {
+    res.status(200).send({ success: false, msg: error.message });
+  }
+});
+const Group = require('./models/GroupModal');
+const Member = require('./models/memberModal');
+app.post('/add-members', isAuthenticated, Usercontroller.addMembers);
+app.post('/update-chat-group', isAuthenticated, async (req, res) => {
+  try {
+    console.log(req.body)
+    if (parseInt(req.body.limit) < parseInt(req.body.last_limit)) {
+      await Member.deleteMany({ group_id: req.body.xid });
+    }
+    var updateobj;
+    if (req.file != undefined) {
+      updateobj = {
+        name: req.body.name,
+        image: 'images/',
+        limit: req.body.limit
+      }
+    } else {
+      updateobj = {
+        name: req.body.name,
+        limit: req.body.limit
+      }
+    }
+    await Group.findByIdAndUpdate({ _id: req.body.xid }, {
+      $set: updateobj
+    })
+    res.status(200).send({ success: true, msg: 'Chat group updated successfully' });
+  } catch (error) {
+    res.status(200).send({ success: false, msg: error.message });
+  }
+});
+app.post('/delete-chat-group', isAuthenticated, async (req, res) => {
+  try {
+    await Group.deleteOne({ _id: req.body.id });
+    await Member.deleteMany({ group_id: req.body.id });
+    res.status(200).send({ success: true, msg: 'Group deleted successfully!' });
+  } catch (error) {
+    res.status(200).send({ success: false, msg: error.message });
+  }
+})
+app.get('/share-group/:id', isAuthenticated, async (req, res) => {
+  try {
+    var groupData = await Group.findOne({ _id: req.params.id });
+    if (!groupData) {
+      res.render('error', { message: '404 not found!' });
+    }
+    else if (req.session.user == undefined) {
+      res.render('error', { message: 'You need to login to access this URL!' });
+    }
+    else {
+      var totalMembers = await Member.find({ group_id: req.params.id }).count();
+      var available = groupData.limit - totalMembers;
+      var isOwner = groupData.creator_id == req.session.user._id ? true : false;
+      var isJoined = await Member.find({ group_id: req.params.id, user_id: req.session.user._id }).count();
+      res.render('shareLink', { group: groupData, totalMembers: totalMembers, isOwner: isOwner, isJoined: isJoined, available: available });
+    }
+  } catch (error) {
+    console.log(error.message);
+  }
+})
+app.post('/join-group', isAuthenticated, async (req, res) => {
+  try {
+    var member = Member({
+      group_id: req.body.group_id,
+      user_id: req.session.user._id
+    });
+    await member.save();
+    res.send({ success: true, msg: 'Congratulation, you have joined the group successfully' });
+  } catch (error) {
+    res.send({ success: false, msg: error.message });
+  }
+})
+app.get('/group-chat', isAuthenticated, Usercontroller.GroupChat);
+app.post('/save-group-chat', isAuthenticated, Usercontroller.SaveGroupChat);
+app.post('/load-group-chats', isAuthenticated, Usercontroller.loadGroupChats);
+app.post('/delete-group-chat', isAuthenticated, Usercontroller.DeleteGroupChat);
+app.post('/update-group-chat', isAuthenticated, Usercontroller.UpdateGroupChat);
+const isEmployee=require('./middlewares/clientmiddleware');
+const isManager=require('./middlewares/managermiddleware');
+const managerRoutes = require('./routes/managerRoutes');
+app.use('/manager', isAuthenticated,isEmployee, managerRoutes);
+const employeeRoutes = require('./routes/employeeRoutes');
+app.use('/employee', isAuthenticated,isManager, employeeRoutes);
+app.get('/settings', isAuthenticated, Usercontroller.LoadSettings);
+app.post('/settings', isAuthenticated, Usercontroller.UpdateProfile);
+const Meeting = require('./models/MeetingModal');
+app.get('/attend/:link', isAuthenticated, (req, res) => {
+  Meeting.findOne({ link: req.params.link }, (err, meeting) => {
+    if (err || !meeting) {
+      return res.status(404).send('Meeting not found');
+    }
+    res.render('attend', { meeting });
+  });
+});
+app.get('/scheduleMeeting', isAuthenticated, async (req, res) => {
+  res.render('scheduleMeeting');
+})
+const meetingRoutes = require('./routes/meetingRoutes');
+app.use('/Meeting', isAuthenticated, meetingRoutes);
+const leaveRoutes = require('./routes/leaveRoutes');
+const GroupChat = require('./models/groupChatModal');
+app.use('/Leave', isAuthenticated,isEmployee, leaveRoutes);
+app.get('/LeaveRequest', isAuthenticated,isManager, async (req, res) => {
+  res.render('LeaveRequest')
+})
+app.get('/manager-approval', isAuthenticated,isEmployee, async (req, res) => {
+  res.render('manager-approval');
+})
+app.get('/projects', isAuthenticated, async (req, res) => {
+  res.render('projects');
+})
+const notificationRoutes = require('./routes/notifications');
+app.use('/home-dashboard', isAuthenticated, notificationRoutes);
+const Notification = require('./models/Notification');
+app.get('/notifications', isAuthenticated, async (req, res) => {
+  const user = req.session.user;
+  const notifications = await Notification.find({ userId: user._id });
+  console.log(notifications);
+  const notificationsJson = JSON.stringify(notifications, (key, value) => {
+    if (typeof value === 'string') {
+      return value.replace(/"/g, '\\"').replace(/'/g, "\\'");
+    }
+    return value;
+  });
+  res.render('notifications', { user: user, notifications: notificationsJson });
+})
+app.post('/home-dashboard', isAuthenticated, function (req, res, next) {
+  req.logout(function (err) {
+    res.clearCookie('user');
+    req.session.destroy(err => {
+      if (err) {
+        return next(err);
+      }
+      res.redirect('/');
+    });
+  });
+});
+app.delete('/delete-account', isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.body.userId;
+    await User.findByIdAndDelete(userId);
+    await Task.findByIdAndDelete(userId);
+    await Chat.findByIdAndDelete(userId);
+    await GroupChat.findByIdAndDelete(userId);
+    await Group.findByIdAndDelete(userId);
+    await Meeting.findByIdAndDelete(userId);
+    req.session.destroy();
+    res.clearCookie('user');
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false });
+  }
+});
+// 404 Error Handling
+app.use((req, res, next) => {
+  res.status(404).render('404error', {
+    title: 'Page Not Found',
+    message: 'The page you are looking for does not exist.',
+    redirectUrl: '/'
+  });
+});
+server.listen(3000, function () {
+  console.log("Server started on port 3000");
+});
+app.get('/socket.io/socket.io.js', (req, res) => {
+  res.sendFile(__dirname + '/node_modules/socket.io/client-dist/socket.io.js');
 });

@@ -1,0 +1,11 @@
+const express = require('express');
+const router = express.Router();
+const managerController = require('../controllers/managerController');
+const notificationController=require('../controllers/notificationController');
+router.get('/tasks', managerController.getTasks);
+router.post('/create-task', managerController.createTask);
+router.post('/update-task', managerController.updateTask);
+router.post('/delete-task/:taskId',managerController.DeleteTask);
+router.get('/edit-task',managerController.editTasks);
+router.get('/notifications',notificationController.getNotifications);
+module.exports = router;
