@@ -920,7 +920,7 @@ const meetingRoutes = require('./routes/meetingRoutes');
 app.use('/Meeting', isAuthenticated, meetingRoutes);
 const leaveRoutes = require('./routes/leaveRoutes');
 const GroupChat = require('./models/groupChatModal');
-app.use('/Leave', isAuthenticated,isEmployee, leaveRoutes);
+app.use('/Leave', isAuthenticated,leaveRoutes);
 app.get('/LeaveRequest', isAuthenticated,isManager, async (req, res) => {
   res.render('LeaveRequest')
 })
