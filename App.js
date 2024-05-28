@@ -964,7 +964,12 @@ app.delete('/delete-account', isAuthenticated, async (req, res) => {
     await Chat.findByIdAndDelete(userId);
     await GroupChat.findByIdAndDelete(userId);
     await Group.findByIdAndDelete(userId);
-    await Meeting.findByIdAndDelete(userId);
+    await Meeting.deleteMany({
+      $or: [
+        { createdBy: req.session.user._id },
+        { attendees: req.session.user.email }
+      ]
+    });
     req.session.destroy();
     res.clearCookie('user');
     res.json({ success: true });
