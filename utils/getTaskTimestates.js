@@ -1,19 +1,33 @@
-const Task=require('../models/TaskModal');
-const User=require('../models/UserModal');
+const Task = require('../models/TaskModal');
+const User = require('../models/UserModal');
+
 async function getTaskTimeStats() {
-    const users = await User.find({role:'employee'});
+    const users = await User.find({ role: 'employee' });
     const stats = [];
+
     for (const user of users) {
-      const tasks = await Task.find({ assignedTo: user._id });
-      const totalTimeSpent = tasks.reduce((total, task) => {
-        if (task.startTime && task.endTime) {
-          const duration = (new Date(task.endTime) - new Date(task.startTime)) / (1000 * 60); // Convert milliseconds to minutes
-          return total + duration;
+        const tasks = await Task.find({ assignedTo: user._id });
+        let totalTimeSpent = 0;
+
+        for (const task of tasks) {
+            if (task.startTime && task.endTime) {
+                const startTime = new Date(task.startTime);
+                const endTime = new Date(task.endTime);
+                const duration = (endTime - startTime) / (1000 * 60);
+                totalTimeSpent += duration;
+
+                // Logging for debugging
+                console.log(`User: ${user.username}, Task: ${task.title}, StartTime: ${startTime}, EndTime: ${endTime}, Duration: ${duration}`);
+            } else {
+                // Logging for debugging
+                console.log(`User: ${user.username}, Task: ${task.title} does not have valid startTime or endTime`);
+            }
         }
-        return total;
-      }, 0);
-      stats.push({ user: user.username, totalTimeSpent });
+
+        stats.push({ user: user.username, totalTimeSpent });
     }
+
     return stats;
-  }
-module.exports={getTaskTimeStats};
+}
+
+module.exports = { getTaskTimeStats };
