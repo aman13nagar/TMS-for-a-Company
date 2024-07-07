@@ -1,264 +1,142 @@
-<%-include('Partials/header')-%>
-<style>
-  /* Reset some default styles */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Task</title>
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+            background: #f5f5f5;
+        }
 
-body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f4f4;
-}
+        main {
+            flex: 1 0 auto;
+        }
 
-.form-container {
-  max-width: 500px;
-  margin: 20px auto;
-  padding: 20px;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
+        .container {
+            margin-top: 50px;
+        }
 
-.form-container h2 {
-  text-align: center;
-  margin-bottom: 20px;
-}
+        .form-container {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
 
-.form-container label {
-  font-weight: bold;
-}
+        .btn-custom {
+            background-color: #6200ea;
+        }
 
-.form-container input[type="text"],
-.form-container textarea,
-.form-container select {
-  width: 100%;
-  padding: 10px;
-  margin: 8px 0;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
+        .preloader-wrapper {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <div class="container">
+            <div class="row">
+                <form id="taskForm" action="/manager/create-task" method="POST" class="col s12 form-container">
+                    <h5 class="center-align">Create New Task</h5>
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <i class="material-icons prefix">title</i>
+                            <input type="text" id="title" name="title" required>
+                            <label for="title">Title</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <i class="material-icons prefix">description</i>
+                            <textarea id="description" name="description" class="materialize-textarea" required></textarea>
+                            <label for="description">Description</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <i class="material-icons prefix">priority_high</i>
+                            <select id="priority" name="priority" required>
+                                <option value="" disabled selected>Choose your option</option>
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                            <label for="priority">Priority</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <i class="material-icons prefix">event</i>
+                            <input type="text" class="datepicker" id="dueDate" name="dueDate" required>
+                            <label for="dueDate">Due Date</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <i class="material-icons prefix">person</i>
+                            <select id="assignedTo" name="assignedTo" required>
+                                <option value="" disabled selected>Choose your option</option>
+                                <% employees.forEach(employee => { %>
+                                    <option value="<%= employee._id %>"><%= employee.username %></option>
+                                <% }) %>
+                            </select>
+                            <label for="assignedTo">Assign To</label>
+                        </div>
+                    </div>
+                    <div class="row center-align">
+                        <button type="submit" class="btn waves-effect waves-light btn-custom">Create Task</button>
+                    </div>
+                </form>
+                <div id="loading" class="center-align" style="display: none;">
+                    <div class="preloader-wrapper active">
+                        <div class="spinner-layer spinner-blue-only">
+                            <div class="circle-clipper left">
+                                <div class="circle"></div>
+                            </div><div class="gap-patch">
+                                <div class="circle"></div>
+                            </div><div class="circle-clipper right">
+                                <div class="circle"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <p>Please wait a moment while the task is being created...</p>
+                </div>
+            </div>
+        </div>
+    </main>
 
-.form-container select {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='%23333333' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z'/%3E%3C/svg%3E");
-  background-position: right 10px center;
-  background-repeat: no-repeat;
-}
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var elems = document.querySelectorAll('select');
+            var instances = M.FormSelect.init(elems);
 
-.form-container input[type="date"] {
-  width: calc(100% - 22px);
-}
+            var dateElems = document.querySelectorAll('.datepicker');
+            var dateInstances = M.Datepicker.init(dateElems, {
+                format: 'yyyy-mm-dd'
+            });
 
-.form-container textarea {
-  height: 100px;
-}
+            // Show snackbar if success message is present
+            const successMessage = "<%= messages.success || '' %>";
+            if (successMessage) {
+                M.toast({html: successMessage, classes: 'rounded'});
+            }
+        });
 
-.form-container button[type="submit"] {
-  width: 100%;
-  background-color: #4caf50;
-  color: white;
-  padding: 14px 20px;
-  margin: 10px 0;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-}
+        // Show loading indicator on form submit
+        document.getElementById('taskForm').addEventListener('submit', function() {
+            document.querySelector('.form-container').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+        });
+    </script>
+</body>
+</html>
 
-.form-container button[type="submit"]:hover {
-  background-color: #45a049;
-}
-.task-list {
-  list-style-type: none;
-  padding: 0;
-  margin: 20px 0;
-}
-
-.task-list li {
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  margin-bottom: 20px;
-}
-
-.task-list h3 {
-  margin-bottom: 10px;
-}
-
-.task-list p {
-  margin-bottom: 5px;
-}
-
-.task-list form {
-  margin-top: 10px;
-}
-
-.task-list label {
-  font-weight: bold;
-}
-
-.task-list input[type="text"],
-.task-list textarea,
-.task-list select {
-  width: 100%;
-  padding: 10px;
-  margin: 8px 0;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
-.task-list select {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='%23333333' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z'/%3E%3C/svg%3E");
-  background-position: right 10px center;
-  background-repeat: no-repeat;
-}
-
-.task-list input[type="date"] {
-  width: calc(100% - 22px);
-}
-
-.task-list button[type="submit"] {
-  width: 100%;
-  background-color: #4caf50;
-  color: white;
-  padding: 14px 20px;
-  margin: 10px 0;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-}
-.task-list button[type="submit"]:hover {
-  background-color: #45a049;
-}
-#update-task:hover{
-  background-color:#45a049;;
-}
-/* Modal Container */
-.modal {
-  display: none; /* Hidden by default */
-  position: fixed; /* Stay in place */
-  z-index: 1000; /* Sit on top */
-  left: 0;
-  top: 0;
-  width: 100%; /* Full width */
-  height: 100%; /* Full height */
-  overflow: auto; /* Enable scroll if needed */
-  background-color: rgba(0, 0, 0, 0.5); /* Black w/ opacity */
-  transition: opacity 0.3s ease;
-}
-
-/* Modal Content */
-.modal-content {
-  background-color: #fefefe;
-  margin: 15% auto; /* 15% from the top and centered */
-  padding: 20px;
-  border: 1px solid #888;
-  width: 80%; /* Could be more or less, depending on screen size */
-  max-width: 500px; /* Maximum width */
-  border-radius: 10px; /* Rounded corners */
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  animation: fadeIn 0.5s;
-}
-
-/* Close Button */
-.close {
-  color: #aaa;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
-}
-
-.close:hover,
-.close:focus {
-  color: #000;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-/* Error Message */
-.modal-content p {
-  font-size: 18px;
-  color: #d8000c;
-  background-color: #ffbaba;
-  padding: 15px;
-  border-radius: 5px;
-  text-align: center;
-}
-
-/* Show Modal */
-.show {
-  display: block;
-  opacity: 1;
-}
-
-/* Fade In Animation */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-</style>
-<form action="/manager/create-task" method="POST" class="form-container">
-  <div>
-    <label for="title">Title</label>
-    <input type="text" id="title" name="title" required>
-  </div>
-  <div>
-    <label for="description">Description</label>
-    <textarea id="description" name="description" required></textarea>
-  </div>
-  <div>
-    <label for="priority">Priority</label>
-    <select id="priority" name="priority" required>
-      <option value="low">Low</option>
-      <option value="medium">Medium</option>
-      <option value="high">High</option>
-    </select>
-  </div>
-  <div>
-    <label for="dueDate">Due Date</label>
-    <input type="date" id="dueDate" name="dueDate" required>
-  </div>
-  <div>
-    <label for="assignedTo">Assign To</label>
-    <select id="assignedTo" name="assignedTo" required>
-      <% employees.forEach(employee => { %>
-        <option value="<%= employee._id %>"><%= employee.username %></option>
-      <% }) %>
-    </select>
-  </div>
-  <button type="submit">Create Task</button>
-</form>
-<div id="myModal" class="modal <%= messages.success ? 'show' : '' %>">
-  <% if (messages.success) { %>
-  <div class="modal-content" id="m-c1">
-    <span class="close" onclick="closeModal()">&times;</span>
-    <p><%= messages.success %></p>
-  </div>
-  <% } %>
-</div>
-<script>
-  // Close the modal when the close button is clicked or after 3 seconds
-  function closeModal() {
-    var modal = document.getElementById("myModal");
-    if (modal) {
-      modal.style.display = "none";
-    }
-  }
-  if ('<%= messages.success ? true : false %>') {
-    setTimeout(closeModal, 2000);
-  }
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.js" integrity="sha512-+k1pnlgt4F1H8L7t3z95o3/KO+o78INEcXTbnoJQ/F2VqDVhWoaiVml/OEHv9HsVgxUaVW+IbiZPUJQfF/YxZw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
