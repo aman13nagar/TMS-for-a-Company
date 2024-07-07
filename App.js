@@ -86,15 +86,6 @@ app.get("/", function (req, res) {
   if (req.session.user) req.session.destroy();
   res.render("home");
 })
-app.get("/auth/google",
-  passport.authenticate("google", { scope: ["profile"] })
-)
-app.get("/auth/google/home-dashboard",
-  passport.authenticate('google', { failureRedirect: "/home-guest" }),
-  function (req, res) {
-    res.redirect('/home-dashboard');
-  }
-)
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: { user: process.env.USER, pass: process.env.APP_PASSWORD },
@@ -514,7 +505,7 @@ app.post('/forgot-password', async (req, res) => {
     from: 'aammn52340@gmail.com',
     to: email,
     subject: 'Password Reset Request',
-    text: `To reset your password, click the following link: http://time-management-system-for-a-company.onrender.com/reset_password?token=${token}`
+    text: `To reset your password, click the following link: http://localhost:3000/reset_password?token=${token}`
   };
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
@@ -920,7 +911,7 @@ const meetingRoutes = require('./routes/meetingRoutes');
 app.use('/Meeting', isAuthenticated, meetingRoutes);
 const leaveRoutes = require('./routes/leaveRoutes');
 const GroupChat = require('./models/groupChatModal');
-app.use('/Leave', isAuthenticated,leaveRoutes);
+app.use('/Leave', isAuthenticated, leaveRoutes);
 app.get('/LeaveRequest', isAuthenticated,isManager, async (req, res) => {
   res.render('LeaveRequest')
 })
@@ -945,6 +936,32 @@ app.get('/notifications', isAuthenticated, async (req, res) => {
   });
   res.render('notifications', { user: user, notifications: notificationsJson });
 })
+const TaskProgress=require('./models/TaskProgress');
+app.get('/progress/:taskId',isAuthenticated, async (req, res) => {
+  try {
+    const task = await Task.findById(req.params.taskId);
+    const taskProgress = await TaskProgress.find({ taskId: req.params.taskId });
+    res.render('progress', { task, taskProgress });
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+app.post('/progress/:taskId',isAuthenticated, async (req, res) => {
+  try {
+    const { description, startTime, endTime } = req.body;
+    const task=await Task.findById(req.params.taskId);
+    const taskProgress = new TaskProgress({
+      taskId: req.params.taskId,
+      description,
+      startTime,
+      endTime
+    });
+    await taskProgress.save();
+    res.render('progress',{task,taskProgress});
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
 app.post('/home-dashboard', isAuthenticated, function (req, res, next) {
   req.logout(function (err) {
     res.clearCookie('user');
@@ -964,6 +981,7 @@ app.delete('/delete-account', isAuthenticated, async (req, res) => {
     await Chat.findByIdAndDelete(userId);
     await GroupChat.findByIdAndDelete(userId);
     await Group.findByIdAndDelete(userId);
+    //await Meeting.findByIdAndDelete(userId);
     await Meeting.deleteMany({
       $or: [
         { createdBy: req.session.user._id },
@@ -977,6 +995,7 @@ app.delete('/delete-account', isAuthenticated, async (req, res) => {
     res.status(500).json({ success: false });
   }
 });
+
 // 404 Error Handling
 app.use((req, res, next) => {
   res.status(404).render('404error', {
@@ -991,3 +1010,4 @@ server.listen(3000, function () {
 app.get('/socket.io/socket.io.js', (req, res) => {
   res.sendFile(__dirname + '/node_modules/socket.io/client-dist/socket.io.js');
 });
+
