@@ -12,13 +12,35 @@ const getTasks = async (req, res) => {
   const employees = await User.find({ role: 'employee' });
   res.render('manager-tasks', { tasks, employees, user });
 };
-const editTasks=async(req,res)=>{
-  const user=req.session.user;
-  if(!user) return res.redirect('/');
-  const tasks=await Task.find({createdBy:user._id}).populate('assignedTo');
-  const employees=await User.find({role:'employee'});
-  res.render('edit-task',{tasks,employees,user});
-}
+const editTasks = async (req, res) => {
+  const user = req.session.user;
+  if (!user) return res.redirect('/home-guest');
+
+  const perPage = 10; // Number of tasks per page
+  const page = parseInt(req.query.page) || 1;
+
+  try {
+      const totalTasks = await Task.countDocuments({ createdBy: user._id });
+      const totalPages = Math.ceil(totalTasks / perPage);
+      const tasks = await Task.find({ createdBy: user._id })
+                              .populate('assignedTo')
+                              .skip((page - 1) * perPage)
+                              .limit(perPage);
+      const employees = await User.find({ role: 'employee' });
+
+      res.render('edit-task', {
+          tasks,
+          employees,
+          user,
+          currentPage: page,
+          totalPages,
+      });
+  } catch (error) {
+      console.error(error);
+      res.status(500).send('Server Error');
+  }
+};
+
 const createTask = async (req, res) => {
   const { title, description, priority, dueDate, assignedTo } = req.body;
   let task = new Task({
@@ -85,4 +107,6 @@ const DeleteTask= async (req, res) => {
     res.json({ success: false });
   }
 };
+
 module.exports={getTasks,updateTask,createTask,DeleteTask,editTasks};
+
