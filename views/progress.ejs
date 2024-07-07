@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Progress Tracker</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      background-color: #f0f2f5;
+    }
+
+    .container {
+      margin-top: 50px;
+    }
+
+    .task-details h2, .progress-log h2, .add-progress h2 {
+      color: #424242;
+      border-bottom: 2px solid #e0e0e0;
+      padding-bottom: 10px;
+    }
+
+    .progress-log ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .progress-log ul li {
+      background-color: #fafafa;
+      padding: 10px;
+      border: 1px solid #eee;
+      border-radius: 5px;
+      margin-bottom: 10px;
+      transition: transform 0.3s ease;
+    }
+
+    .progress-log ul li:hover {
+      transform: translateY(-5px);
+    }
+
+    .chart-container {
+      position: relative;
+      height: 400px;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="center-align">Task Progress Tracker</h1>
+    <div class="row">
+      <div class="col s12 m6">
+        <div class="card">
+          <div class="card-content">
+            <span class="card-title"><%= task.title %></span>
+            <p><strong>Description:</strong> <%= task.description %></p>
+            <p><strong>Priority:</strong> <%= task.priority %></p>
+            <p><strong>Status:</strong> <%= task.status %></p>
+            <p><strong>Due Date:</strong> <%= task.dueDate.toDateString() %></p>
+          </div>
+        </div>
+      </div>
+      <div class="col s12 m6">
+        <div class="card">
+          <div class="card-content">
+            <span class="card-title">Add Progress</span>
+            <form action="/progress/<%= task._id %>" method="POST">
+              <div class="input-field">
+                <input type="text" id="description" name="description" required>
+                <label for="description">Description</label>
+              </div>
+              <div class="row">
+                <div class="input-field col s12">
+                  <i class="material-icons prefix">event</i>
+                  <input type="text" class="datepicker" id="startTime" name="startTime" required>
+                  <label for="startTime">Start Date</label>
+                </div>
+              </div>
+              <div class="row">
+                <div class="input-field col s12">
+                    <i class="material-icons prefix">event</i>
+                    <input type="text" class="datepicker" id="endTime" name="endTime" required>
+                    <label for="endTime">End Date</label>
+                </div>
+              </div>
+              <button type="submit" class="btn waves-effect waves-light">Check Progress</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="chart-container">
+      <canvas id="progressChart"></canvas>
+    </div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const elems = document.querySelectorAll('.datepicker');
+      M.Datepicker.init(elems);
+
+      const progressLogs = JSON.parse('<%- JSON.stringify(taskProgress) %>');
+      console.log(progressLogs);
+      displayChart(progressLogs);
+    });
+
+    function displayChart(progressLogs) {
+      const ctx = document.getElementById('progressChart').getContext('2d');
+      const progressDurations = progressLogs.map(log => {
+        const startTime = new Date(log.startTime);
+        const endTime = new Date(log.endTime);
+        return (endTime - startTime) / (1000 * 60 * 60); // Convert to hours
+      });
+
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: progressLogs.map(log => new Date(log.startTime).toLocaleDateString()),
+          datasets: [{
+            label: 'Time Spent (hours)',
+            data: progressDurations,
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 2,
+            pointBackgroundColor: 'rgba(75, 192, 192, 1)',
+            pointBorderColor: '#fff',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: 'rgba(75, 192, 192, 1)'
+          }]
+        },
+        options: {
+          responsive: true,
+          fill:true,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top',
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return context.dataset.label + ': ' + context.raw.toFixed(2) + ' hours';
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Date'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Hours Spent'
+              },
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
+
