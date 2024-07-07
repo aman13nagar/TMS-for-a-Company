@@ -28,7 +28,7 @@ router.post('/approve-leave/:id',isEmployee,async (req, res) => {
         res.status(500).send('Server Error');
     }
 });
-router.post('/reject-leave/:id',isEmployee, async (req, res) => {
+router.post('/reject-leave/:id', isEmployee,async (req, res) => {
     try {
         const leaveRequest = await LeaveRequest.findById(req.params.id);
         leaveRequest.status = 'rejected';
