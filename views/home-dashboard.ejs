@@ -186,9 +186,9 @@
           <h2>Tips & Best Practices</h2>
           <p>Check out our latest tips on how to manage your time effectively and boost your productivity.</p>
           <ul>
-              <li><a href="#">How to prioritize your tasks effectively</a></li>
-              <li><a href="#">Best practices for remote meetings</a></li>
-              <li><a href="#">Using our software to maximize efficiency</a></li>
+              <li><a href="https://asana.com/resources/how-prioritize-tasks-work">How to prioritize your tasks effectively</a></li>
+              <li><a href="https://workleap.com/blog/remote-meeting/">Best practices for remote meetings</a></li>
+              <li><a href="https://workleap.com/blog/remote-meeting/">Using our software to maximize efficiency</a></li>
           </ul>
       </div>
   </div>
@@ -217,22 +217,22 @@
                           </div>
                         <%}else{%>
                           <div class="c-user">
-                            <li class="list-group-item list-group-item-dark cursor-pointer user-list" data-id="<%=users[i]['_id']%>">
-                              <% if(users[i].profilePictureUrl===undefined){%>
+                            <li class="list-group-item list-group-item-dark cursor-pointer user-list" data-id="<%= users[i]['_id'] %>">
+                              <% if (users[i].profilePictureUrl === undefined) { %>
                                 <svg xmlns="http://www.w3.org/2000/svg" height="40" fill="currentColor" class="bi bi-person-circle " viewBox="0 0 30 16" style="margin-right:-25px">
-                                  <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
-                                  <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
+                                  <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
+                                  <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z" />
                                 </svg>
-                              <%}else{%>
-                                <img src="<%= users[i].profilePictureUrl %>" height="40" style="height:40px;width:40px;border-radius: 50%;margin-right:3%">
-                              <%}%>
-                              <%=users[i]['username']%>
-                              <%if(users[i]['is_online']==1){%>
-                                  <sup class="online-status" id="<%=users[i]['_id'] %>-status">Online</sup>
-                              <%}else{%>
-                                  <sup class="offline-status" id="<%=users[i]['_id']%>-status">Offline</sup>
-                              <%}%>
-                            </li>
+                              <% } else { %>
+                                <img src="<%= users[i].profilePictureUrl %>" height="40" style="height:40px;width:40px;border-radius: 50%;margin-right:3%" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', `<svg xmlns='http://www.w3.org/2000/svg' height='40' fill='currentColor' class='bi bi-person-circle' viewBox='0 0 30 16' style='margin-right:-25px'><path d='M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z'/><path fill-rule='evenodd' d='M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z'/></svg>`);">
+                              <% } %>
+                              <%= users[i]['username'] %>
+                              <% if (users[i]['is_online'] == 1) { %>
+                                <sup class="online-status" id="<%= users[i]['_id'] %>-status">Online</sup>
+                              <% } else { %>
+                                <sup class="offline-status" id="<%= users[i]['_id'] %>-status">Offline</sup>
+                              <% } %>
+                            </li>                            
                           </div>
                         <%}%>
                         
@@ -645,7 +645,7 @@ document.getElementById('searchInput').addEventListener('input', function() {
             let taskChart = new Chart(ctxTasks, {
         type: 'bar',
         data: {
-            labels: ['Completed', 'Pending', 'Overdue'],
+            labels: ['Completed', 'Pending', 'Incomplete'],
             datasets: [{
                 label: 'Tasks',
                 data:[user.CompletedTasks,user.PendingTasks,user.OverdueTasks],
